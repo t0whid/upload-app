@@ -10,7 +10,9 @@ class UploadController extends Controller
 {
     public function upload(Request $request)
     {
-        $request->validate(['file' => 'required|file|max:512000']); // adjust max in KB
+        $request->validate([
+            'file' => 'required|file|max:512000' // max ~500MB adjust as needed
+        ]);
 
         $file = $request->file('file');
         $originalName = $file->getClientOriginalName();
@@ -22,7 +24,7 @@ class UploadController extends Controller
 
         $apiKey = env('ONEFICHIER_API_KEY');
 
-        // Get upload server
+        // Step 1: Get 1Fichier upload server
         $ch = curl_init('https://api.1fichier.com/v1/upload/get_upload_server.cgi');
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_HTTPHEADER, [
@@ -40,9 +42,10 @@ class UploadController extends Controller
         }
 
         $serverJson = json_decode($serverResp, true);
-        $uploadUrl = ($serverJson['url'] ?? 'https://upload.1fichier.com') . '/upload.cgi?id=' . ($serverJson['id'] ?? '');
+        $uploadId = $serverJson['id'] ?? uniqid();
+        $uploadUrl = 'https://' . ($serverJson['url'] ?? 'upload.1fichier.com') . '/upload.cgi?id=' . $uploadId;
 
-        // Upload file to 1fichier
+        // Step 2: Upload file to 1Fichier
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $uploadUrl);
         curl_setopt($ch, CURLOPT_POST, true);
@@ -52,9 +55,9 @@ class UploadController extends Controller
         $cfile = new \CURLFile($absolutePath, mime_content_type($absolutePath), $originalName);
         curl_setopt($ch, CURLOPT_POSTFIELDS, ['file[]' => $cfile]);
 
-        // enable progress
+        // Enable progress callback
         curl_setopt($ch, CURLOPT_NOPROGRESS, false);
-        curl_setopt($ch, CURLOPT_PROGRESSFUNCTION, function ($resource, $download_size, $downloaded, $upload_size, $uploaded) use ($size) {
+        curl_setopt($ch, CURLOPT_PROGRESSFUNCTION, function ($resource, $dlsize, $dloaded, $uls, $ul) use ($size) {
             static $lastTime = null;
             static $lastUploaded = 0;
 
@@ -63,7 +66,7 @@ class UploadController extends Controller
             $elapsed = $now - $lastTime;
             if ($elapsed <= 0) return 0;
 
-            $bytesUploaded = $uploaded ?: $lastUploaded;
+            $bytesUploaded = $ul ?: $lastUploaded;
             $speedBps = ($bytesUploaded - $lastUploaded) / $elapsed;
             $lastTime = $now;
             $lastUploaded = $bytesUploaded;
@@ -87,6 +90,26 @@ class UploadController extends Controller
 
         broadcast(new UploadProgress('laravel->1fichier', 100, $size, 0, 'Upload finished'));
 
-        return response()->json(['status' => 'ok', 'response' => $response]);
+        // Step 3: Get final download links
+        $endUrl = "https://" . ($serverJson['url'] ?? 'upload.1fichier.com') . "/end.pl?xid={$uploadId}";
+        $ch = curl_init($endUrl);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, ['Authorization: Bearer ' . $apiKey, 'JSON: 1']);
+        $endResp = curl_exec($ch);
+        curl_close($ch);
+
+        $links = [];
+        if ($endResp) {
+            $endJson = json_decode($endResp, true);
+            if (!empty($endJson['links'])) {
+                $links = $endJson['links'];
+            }
+        }
+
+        return response()->json([
+            'status' => 'ok',
+            'upload_id' => $uploadId,
+            'links' => $links
+        ]);
     }
 }
