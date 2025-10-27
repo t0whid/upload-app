@@ -4,14 +4,16 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use App\Events\UploadProgress;
+use App\Models\UploadedFile;
 
 class UploadController extends Controller
 {
     public function upload(Request $request)
     {
         $request->validate([
-            'file' => 'required|file|max:512000' // max ~500MB adjust as needed
+            'file' => 'required|file|max:512000' // ~500MB
         ]);
 
         $file = $request->file('file');
@@ -98,18 +100,30 @@ class UploadController extends Controller
         $endResp = curl_exec($ch);
         curl_close($ch);
 
-        $links = [];
+        $savedLinks = [];
         if ($endResp) {
             $endJson = json_decode($endResp, true);
             if (!empty($endJson['links'])) {
-                $links = $endJson['links'];
+                foreach ($endJson['links'] as $link) {
+                    $slug = Str::random(10);
+                    $savedLinks[] = UploadedFile::create([
+                        'slug' => $slug,
+                        'filename' => $link['filename'],
+                        'download_url' => $link['download'],
+                        'remove_url' => $link['remove'] ?? null,
+                        'size' => $link['size'] ?? 0,
+                        'whirlpool' => $link['whirlpool'] ?? null,
+                    ]);
+                }
             }
         }
+
+        $firstSlug = $savedLinks[0]->slug ?? null;
 
         return response()->json([
             'status' => 'ok',
             'upload_id' => $uploadId,
-            'links' => $links
+            'first_slug' => $firstSlug,
         ]);
     }
 }

@@ -7,10 +7,10 @@
 <script src="https://js.pusher.com/8.2/pusher.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 <style>
-    body { font-family: sans-serif; margin: 40px; }
-    .progress-container { width: 100%; background: #eee; border-radius: 6px; overflow: hidden; margin-bottom: 20px; }
-    .progress-bar { height: 25px; width: 0%; background: #4CAF50; text-align: center; color: white; font-size: 14px; transition: width 0.3s ease; }
-    .speed { margin-top: 5px; font-size: 14px; }
+body { font-family: sans-serif; margin: 40px; }
+.progress-container { width: 100%; background: #eee; border-radius: 6px; overflow: hidden; margin-bottom: 20px; }
+.progress-bar { height: 25px; width: 0%; background: #4CAF50; text-align: center; color: white; font-size: 14px; transition: width 0.3s ease; }
+.speed { margin-top: 5px; font-size: 14px; }
 </style>
 <script>
 const PUSHER_KEY = "{{ config('broadcasting.connections.pusher.key') }}";
@@ -19,7 +19,7 @@ const PUSHER_CLUSTER = "{{ config('broadcasting.connections.pusher.options.clust
 let browserPercent = 0;
 let serverPercent = 0;
 let displayedSpeed = { value: 0 };
-const browserWeight = Math.random() * 0.1 + 0.45; // 0.45–0.55
+const browserWeight = Math.random() * 0.1 + 0.45;
 const serverWeight = 1 - browserWeight;
 
 function updateCombinedProgress() {
@@ -37,7 +37,6 @@ function smoothSpeedDisplay(target) {
     animate();
 }
 
-// Setup Pusher
 const pusher = new Pusher(PUSHER_KEY, { cluster: PUSHER_CLUSTER, forceTLS: true });
 const channel = pusher.subscribe('upload-progress');
 channel.bind('progress-updated', function(data) {
@@ -76,20 +75,8 @@ document.addEventListener('DOMContentLoaded', () => {
             updateCombinedProgress();
             smoothSpeedDisplay(0);
 
-            // Display download links
-            const linksDiv = document.getElementById('downloadLinks');
-            linksDiv.innerHTML = '';
-            if (res.data.links && res.data.links.length) {
-                res.data.links.forEach(link => {
-                    const a = document.createElement('a');
-                    a.href = link.download;
-                    a.target = '_blank';
-                    a.innerText = link.filename + ' (' + (link.size/1024).toFixed(2) + ' KB)';
-                    linksDiv.appendChild(a);
-                    linksDiv.appendChild(document.createElement('br'));
-                });
-            } else {
-                linksDiv.innerText = 'Upload completed, but no links returned.';
+            if (res.data.first_slug) {
+                window.location.href = '/download/' + res.data.first_slug;
             }
 
         } catch (err) {
@@ -110,8 +97,5 @@ document.addEventListener('DOMContentLoaded', () => {
     <div id="combinedProgress" class="progress-bar">0%</div>
 </div>
 <div class="speed" id="combinedSpeed">Speed: 0 MB/s</div>
-
-<h3>Download Links</h3>
-<div id="downloadLinks"></div>
 </body>
 </html>
