@@ -19,6 +19,7 @@ return new class extends Migration
             $table->string('remove_url')->nullable();
             $table->bigInteger('size')->default(0);
             $table->string('whirlpool')->nullable();
+            $table->string('captcha')->nullable(); 
             $table->timestamps();
         });
     }

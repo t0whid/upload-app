@@ -9,4 +9,7 @@ Route::get('/', function () {
 });
 
 Route::post('/upload', [UploadController::class, 'upload']);
-Route::get('/download/{slugs}', [DownloadController::class, 'show']);
+Route::get('/download/{slugs}', [DownloadController::class, 'show'])->name('download.show');
+Route::get('/captcha.png', [DownloadController::class, 'captchaImage'])->name('download.captcha');
+Route::post('/download/verify', [DownloadController::class, 'verify'])->name('download.verify');
+
