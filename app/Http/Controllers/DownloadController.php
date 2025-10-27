@@ -7,9 +7,10 @@ use Illuminate\Http\Request;
 
 class DownloadController extends Controller
 {
-    public function show($slug)
+    public function show($slugs)
     {
-        $file = UploadedFile::where('slug', $slug)->firstOrFail();
-        return view('download', ['file' => $file]);
+        $slugArray = explode(',', $slugs);
+        $files = UploadedFile::whereIn('slug', $slugArray)->get();
+        return view('download', ['files' => $files]);
     }
 }

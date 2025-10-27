@@ -9,4 +9,4 @@ Route::get('/', function () {
 });
 
 Route::post('/upload', [UploadController::class, 'upload']);
-Route::get('/download/{slug}', [DownloadController::class, 'show'])->name('download.show');
+Route::get('/download/{slugs}', [DownloadController::class, 'show']);

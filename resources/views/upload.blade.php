@@ -3,13 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="csrf-token" content="{{ csrf_token() }}">
-<title>1Fichier Upload</title>
+<title>1Fichier Multi Upload</title>
 <script src="https://js.pusher.com/8.2/pusher.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 <style>
 body { font-family: sans-serif; margin: 40px; }
 .progress-container { width: 100%; background: #eee; border-radius: 6px; overflow: hidden; margin-bottom: 20px; }
-.progress-bar { height: 25px; width: 0%; background: #4CAF50; text-align: center; color: white; font-size: 14px; transition: width 0.3s ease; }
+.progress-bar { height: 25px; width: 0%; background: #4CAF50; text-align: center; color: white; font-size: 14px; transition: width 0.2s ease; }
 .speed { margin-top: 5px; font-size: 14px; }
 </style>
 <script>
@@ -19,11 +19,12 @@ const PUSHER_CLUSTER = "{{ config('broadcasting.connections.pusher.options.clust
 let browserPercent = 0;
 let serverPercent = 0;
 let displayedSpeed = { value: 0 };
-const browserWeight = Math.random() * 0.1 + 0.45;
+const browserWeight = Math.random() * 0.1 + 0.45; // 0.45-0.55
 const serverWeight = 1 - browserWeight;
 
 function updateCombinedProgress() {
-    const combinedPercent = Math.round(browserPercent * browserWeight + serverPercent * serverWeight);
+    let combinedPercent = browserPercent * browserWeight + serverPercent * serverWeight;
+    combinedPercent = Math.min(100, Math.round(combinedPercent)); // ✅ Cap at 100%
     document.getElementById('combinedProgress').style.width = combinedPercent + '%';
     document.getElementById('combinedProgress').innerText = combinedPercent + '%';
 }
@@ -37,6 +38,7 @@ function smoothSpeedDisplay(target) {
     animate();
 }
 
+// ✅ Pusher for server progress
 const pusher = new Pusher(PUSHER_KEY, { cluster: PUSHER_CLUSTER, forceTLS: true });
 const channel = pusher.subscribe('upload-progress');
 channel.bind('progress-updated', function(data) {
@@ -49,11 +51,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const uploadBtn = document.getElementById('uploadBtn');
     uploadBtn.addEventListener('click', async () => {
         const fileInput = document.getElementById('fileInput');
-        if (!fileInput.files.length) return alert('Select a file first!');
-        const file = fileInput.files[0];
+        if (!fileInput.files.length) return alert('Select at least one ZIP file!');
 
         const formData = new FormData();
-        formData.append('file', file);
+        for (let file of fileInput.files) formData.append('file[]', file);
 
         const startTime = Date.now();
 
@@ -65,6 +66,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 },
                 onUploadProgress: function(progressEvent) {
                     browserPercent = (progressEvent.loaded / progressEvent.total) * 100;
+                    browserPercent = Math.min(100, browserPercent); // ✅ Cap at 100%
                     const elapsed = (Date.now() - startTime) / 1000;
                     const speed = progressEvent.loaded / 1024 / 1024 / elapsed;
                     smoothSpeedDisplay(speed);
@@ -72,11 +74,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
 
-            updateCombinedProgress();
-            smoothSpeedDisplay(0);
-
-            if (res.data.first_slug) {
-                window.location.href = '/download/' + res.data.first_slug;
+            if (res.data.uploaded_slugs.length) {
+                const slugList = res.data.uploaded_slugs.join(',');
+                window.location.href = '/download/' + encodeURIComponent(slugList);
             }
 
         } catch (err) {
@@ -88,8 +88,8 @@ document.addEventListener('DOMContentLoaded', () => {
 </script>
 </head>
 <body>
-<h2>📤 Upload File to 1Fichier</h2>
-<input type="file" id="fileInput">
+<h2>📤 Upload ZIP Files (Max 2GB Total)</h2>
+<input type="file" id="fileInput" multiple accept=".zip">
 <button id="uploadBtn">Upload</button>
 
 <h3>Upload Progress</h3>
