@@ -18,7 +18,7 @@ class DownloadController extends Controller
         $captcha = strtoupper(Str::random(5));
         session(['download_captcha' => $captcha]);
 
-        return view('download', compact('files', 'slugs', 'captcha'));
+        return view('users.pages.download', compact('files', 'slugs', 'captcha'));
     }
 
     // Generate captcha image
@@ -70,6 +70,6 @@ class DownloadController extends Controller
 
         session()->forget('download_captcha');
 
-        return view('download_links', compact('files'));
+        return view('users.pages.download_links', compact('files'));
     }
 }
