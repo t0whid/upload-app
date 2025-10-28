@@ -2,36 +2,36 @@
 @section('title', 'Multi Upload')
 
 @section('content')
-<meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
 
-<div class="hosting" style="margin: 40px auto; max-width: 600px;">
-    <img src="{{ asset('images/icon.svg') }}" alt="icon" class="top-icon">
-    <div class="upload-card">
+    <div class="hosting" style="margin: 40px auto; max-width: 600px;">
+        <img src="{{ asset('images/icon.svg') }}" alt="icon" class="top-icon">
+        <div class="upload-card">
 
-        <h3>The free-for-all File Hosting.</h3>
-        <p>Running in private mode.</p>
-        <div id="uploadForm">
-            <label for="fileInput" class="custom-file-label" id="fileLabel">📁 Choose a file to upload</label>
-            <input type="file" id="fileInput" multiple accept=".zip" required>
-            <button id="uploadBtn" class="btn btn-purple" type="submit">🚀 Upload</button>
-            <div class="small-text">Max upload size: <b>2 GB (only zip)</b></div>           
-        </div>
-
-        <!-- Progress section (hidden initially) -->
-        <div id="progressSection" style="display:none; margin-top:30px;">
-            <h4>Upload Progress</h4>
-            <div class="progress-container"
-                 style="width:100%; background:#eee; border-radius:6px; overflow:hidden; height:25px;">
-                <div id="combinedProgress" class="progress-bar"
-                     style="height:100%; width:0%; background:#4CAF50; color:#fff; text-align:center; font-weight:bold; line-height:25px;">
-                    0%
-                </div>
+            <h3>The free-for-all File Hosting.</h3>
+            <p>Running in private mode.</p>
+            <div id="uploadForm">
+                <label for="fileInput" class="custom-file-label" id="fileLabel">📁 Choose a file to upload</label>
+                <input type="file" id="fileInput" multiple accept=".zip" required>
+                <button id="uploadBtn" class="btn btn-purple" type="submit">🚀 Upload</button>
+                <div class="small-text">Max upload size: <b>2 GB (only zip)</b></div>
             </div>
-            <div class="mt-2" id="combinedSpeed" style="font-size:14px;">Speed: 0 MB/s</div>
-        </div>
 
+            <!-- Progress section (hidden initially) -->
+            <div id="progressSection" style="display:none; margin-top:30px;">
+                <h4>Upload Progress</h4>
+                <div class="progress-container"
+                    style="width:100%; background:#eee; border-radius:6px; overflow:hidden; height:25px;">
+                    <div id="combinedProgress" class="progress-bar"
+                        style="height:100%; width:0%; background:#4CAF50; color:#fff; text-align:center; font-weight:bold; line-height:25px;">
+                        0%
+                    </div>
+                </div>
+                <div class="mt-2" id="combinedSpeed" style="font-size:14px;">Speed: 0 KB/s</div>
+            </div>
+
+        </div>
     </div>
-</div>
 
 @endsection
 
@@ -55,7 +55,7 @@ const pusher = new Pusher(PUSHER_KEY, {
 const channel = pusher.subscribe('upload-progress');
 channel.bind('progress-updated', function(data) {
     serverPercent = data.percent;
-    smoothSpeedDisplay(data.speed);
+    smoothSpeedDisplay(data.speed * 1024, 'KB/s'); // server speed already in MB/s? convert to KB/s
     updateCombinedProgress();
 });
 
@@ -74,7 +74,6 @@ fileInput.addEventListener('change', () => {
     } else if (files.length === 1) {
         fileLabel.textContent = `📁 1 file selected: ${files[0].name}`;
     } else {
-        // Truncate if more than 5 files for readability
         const maxShow = 5;
         const fileNames = Array.from(files).slice(0, maxShow).map(f => f.name).join(', ');
         const moreText = files.length > maxShow ? `... (+${files.length - maxShow} more)` : '';
@@ -89,10 +88,10 @@ function updateCombinedProgress() {
     document.getElementById('combinedProgress').innerText = combinedPercent + '% (' + (currentFileIndex + 1) + '/' + totalFiles + ')';
 }
 
-function smoothSpeedDisplay(target) {
+function smoothSpeedDisplay(target, unit = 'KB/s') {
     const animate = () => {
         displayedSpeed.value += (target - displayedSpeed.value) * 0.1;
-        document.getElementById('combinedSpeed').innerText = 'Speed: ' + displayedSpeed.value.toFixed(2) + ' MB/s';
+        document.getElementById('combinedSpeed').innerText = 'Speed: ' + displayedSpeed.value.toFixed(2) + ' ' + unit;
         if (Math.abs(displayedSpeed.value - target) > 0.01) requestAnimationFrame(animate);
     };
     animate();
@@ -126,8 +125,8 @@ async function uploadFilesSequentially(files) {
                     browserPercent = (progressEvent.loaded / progressEvent.total) * 100;
                     browserPercent = Math.min(100, browserPercent);
                     const elapsed = (Date.now() - startTime) / 1000;
-                    const speed = progressEvent.loaded / 1024 / 1024 / elapsed;
-                    smoothSpeedDisplay(speed);
+                    const speedKBps = (progressEvent.loaded / 1024) / elapsed; // KB/s
+                    smoothSpeedDisplay(speedKBps, 'KB/s');
                     updateCombinedProgress();
                 }
             });
@@ -154,3 +153,4 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 </script>
 @endsection
+
