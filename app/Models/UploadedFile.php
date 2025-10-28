@@ -9,6 +9,6 @@ class UploadedFile extends Model
 {
     use HasFactory;
     protected $fillable = [
-        'slug', 'filename', 'download_url', 'remove_url', 'size', 'whirlpool'
+        'slug', 'filename', 'download_url', 'expires_at', 'remove_url', 'size', 'whirlpool'
     ];
 }

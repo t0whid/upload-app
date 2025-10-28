@@ -14,6 +14,19 @@ class DownloadController extends Controller
         $slugsArray = explode(',', $slugs);
         $files = UploadedFile::whereIn('slug', $slugsArray)->get();
 
+        if ($files->isEmpty()) {
+            return view('users.pages.expired', ['message' => 'No valid files found.']);
+        }
+
+        // 🔥 Check if any file is expired
+        foreach ($files as $file) {
+            if ($file->expires_at && now()->greaterThan($file->expires_at)) {
+                return view('users.pages.expired', [
+                    'message' => 'This download link has expired. Please re-upload your file.'
+                ]);
+            }
+        }
+
         // Generate captcha code
         $captcha = strtoupper(Str::random(5));
         session(['download_captcha' => $captcha]);
@@ -38,7 +51,7 @@ class DownloadController extends Controller
 
         // random lines
         for ($i = 0; $i < 5; $i++) {
-            imageline($image, rand(0,$width), rand(0,$height), rand(0,$width), rand(0,$height), $lineColor);
+            imageline($image, rand(0, $width), rand(0, $height), rand(0, $width), rand(0, $height), $lineColor);
         }
 
         // add text

@@ -117,6 +117,7 @@ class UploadController extends Controller
                         'remove_url' => $link['remove'] ?? null,
                         'size' => $link['size'] ?? 0,
                         'whirlpool' => $link['whirlpool'] ?? null,
+                        'expires_at' => now()->addHours(2),
                     ]);
                     $uploadedSlugs[] = $slug;
                 }

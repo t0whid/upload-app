@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('slug')->unique();
             $table->string('filename');
             $table->string('download_url');
+            $table->timestamp('expires_at')->nullable();
             $table->string('remove_url')->nullable();
             $table->bigInteger('size')->default(0);
             $table->string('whirlpool')->nullable();
