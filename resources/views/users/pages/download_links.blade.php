@@ -2,7 +2,7 @@
 @section('title', 'Download Files')
 
 @section('content')
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<!-- Font Awesome CDN -->
 
 <div class="hosting" style="margin: 40px auto; max-width: 750px;">
     <img src="{{ asset('images/icon.svg') }}" alt="icon" class="top-icon">
@@ -17,23 +17,27 @@
                     $shareText = urlencode("Download this file: {$file->filename}");
                     $shareUrl = urlencode($file->download_url);
                 @endphp
-                <li class="list-group-item d-flex justify-content-between align-items-center flex-wrap">
-                    <div class="file-info">
+                <li class="list-group-item d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center">
+                    
+                    <div class="file-info mb-2 mb-md-0">
                         <i class="fa-regular fa-file-zipper text-primary"></i>
                         <strong>{{ $file->filename }}</strong>
                     </div>
 
-                    <div class="btn-group mt-2 mt-sm-0">
-                        <a href="{{ $file->download_url }}" target="_blank" class="btn btn-sm btn-success">
+                    <div class="btn-group btn-group-sm">
+                        <!-- Download -->
+                        <a href="{{ $file->download_url }}" target="_blank" class="btn btn-success">
                             <i class="fa-solid fa-download"></i>
                         </a>
 
-                        <button class="btn btn-sm btn-outline-primary" onclick="copyLink('{{ $file->download_url }}', this)">
+                        <!-- Copy -->
+                        <button class="btn btn-outline-primary" onclick="copyLink('{{ $file->download_url }}', this)">
                             <i class="fa-solid fa-copy"></i>
                         </button>
 
+                        <!-- Share -->
                         <div class="dropdown">
-                            <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                            <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
                                 <i class="fa-solid fa-share-nodes"></i>
                             </button>
                             <ul class="dropdown-menu">
@@ -64,6 +68,7 @@
                             </ul>
                         </div>
                     </div>
+
                 </li>
             @endforeach
         </ul>
