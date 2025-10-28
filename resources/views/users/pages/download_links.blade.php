@@ -2,7 +2,6 @@
 @section('title', 'Download Files')
 
 @section('content')
-<!-- Font Awesome CDN -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
 <div class="hosting" style="margin: 40px auto; max-width: 750px;">
@@ -25,17 +24,14 @@
                     </div>
 
                     <div class="btn-group mt-2 mt-sm-0">
-                        <!-- Download -->
                         <a href="{{ $file->download_url }}" target="_blank" class="btn btn-sm btn-success">
                             <i class="fa-solid fa-download"></i>
                         </a>
 
-                        <!-- Copy -->
                         <button class="btn btn-sm btn-outline-primary" onclick="copyLink('{{ $file->download_url }}', this)">
                             <i class="fa-solid fa-copy"></i>
                         </button>
 
-                        <!-- Share -->
                         <div class="dropdown">
                             <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
                                 <i class="fa-solid fa-share-nodes"></i>

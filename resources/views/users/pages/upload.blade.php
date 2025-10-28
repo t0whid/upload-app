@@ -12,7 +12,7 @@
             <p>Running in private mode.</p>
             <div id="uploadForm">
                 <label for="fileInput" class="custom-file-label" id="fileLabel">📁 Choose a file to upload</label>
-                <input type="file" id="fileInput" name="file" multiple accept=".zip" required>
+                <input type="file" id="fileInput" multiple accept=".zip" required>
                 <button id="uploadBtn" class="btn btn-purple" type="submit">🚀 Upload</button>
                 <div class="small-text">Max upload size: <b>2 GB (only zip)</b></div>           
             </div>

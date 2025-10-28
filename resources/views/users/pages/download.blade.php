@@ -9,12 +9,11 @@
         <h3>🔒 Verify Captcha to Reveal Download Links</h3>
         <p>Please complete the captcha below to continue.</p>
 
-        <form action="{{ route('download.verify') }}" method="POST" class="mt-3">
+        <form action="{{ route('download.show', $slugs) }}" method="POST" class="mt-3">
             @csrf
-            <input type="hidden" name="slugs" value="{{ $slugs }}">
 
             <div class="captcha-box mb-3">
-                <img src="{{ route('download.captcha') }}" alt="Captcha Image" id="captchaImage" style="border-radius: 6px; border: 1px solid #ccc;">
+                <img src="{{ route('download.captcha') }}" alt="Captcha Image" id="captchaImage" style="border-radius:6px; border:1px solid #ccc;">
             </div>
 
             <input type="text" name="captcha" placeholder="Enter Captcha" class="form-control mb-2" style="text-align:center;">
@@ -26,5 +25,4 @@
         </form>
     </div>
 </div>
-
 @endsection
