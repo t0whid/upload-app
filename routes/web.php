@@ -9,7 +9,8 @@ Route::get('/', function () {
 });
 
 Route::post('/upload', [UploadController::class, 'upload']);
-Route::match(['get', 'post'], '/download/{slugs}', [DownloadController::class, 'show'])->name('download.show');
-Route::get('/captcha.png', [DownloadController::class, 'captchaImage'])->name('download.captcha');
-Route::get('/captcha/refresh', [DownloadController::class, 'refreshCaptcha'])->name('download.refresh');
-/* Route::post('/download/verify', [DownloadController::class, 'verify'])->name('download.verify'); */
+
+Route::get('/download/{slugs}', [DownloadController::class, 'show'])->name('download.show');
+Route::post('/download/verify-captcha', [DownloadController::class, 'verifyCaptcha'])->name('download.verify-captcha');
+Route::get('/captcha/image', [DownloadController::class, 'getCaptcha'])->name('download.captcha');
+Route::post('/captcha/refresh', [DownloadController::class, 'refreshCaptcha'])->name('download.refresh-captcha');
