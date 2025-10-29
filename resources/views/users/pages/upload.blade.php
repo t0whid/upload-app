@@ -283,7 +283,8 @@
 
         let serverPercent = 0;
         let displayedSpeed = { value: 0 };
-        const serverWeight = Math.random() * 0.2 + 0.7;
+        //const serverWeight = Math.random() * 0.2 + 0.7;
+        const serverWeight = Math.random() * 0.2 + 0.4;
         const browserWeight = 1 - serverWeight;
 
         const pusher = new Pusher(PUSHER_KEY, {
