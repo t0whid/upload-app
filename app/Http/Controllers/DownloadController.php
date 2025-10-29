@@ -6,9 +6,17 @@ use Illuminate\Http\Request;
 use App\Models\UploadedFile;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Http;
+use App\Services\RateLimitService;
 
 class DownloadController extends Controller
 {
+    protected $rateLimitService;
+
+    public function __construct(RateLimitService $rateLimitService)
+    {
+        $this->rateLimitService = $rateLimitService;
+    }
+
     public function show($slugs)
     {
         $slugsArray = explode(',', $slugs);
@@ -52,12 +60,30 @@ class DownloadController extends Controller
 
     public function verifyCaptcha(Request $request)
     {
+        // Check download rate limit
+        $rateLimitCheck = $this->rateLimitService->checkLimit(
+            'download', 
+            session()->getId(), 
+            $request->ip()
+        );
+
+        if (!$rateLimitCheck['allowed']) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Download slot not available. Your download is in queue. Please do not leave this page.',
+                'queue_position' => $rateLimitCheck['queue_position'],
+                'current_users' => $rateLimitCheck['current'],
+                'limit' => $rateLimitCheck['limit']
+            ]);
+        }
+
         $request->validate([
             'captcha' => 'required|string',
             'slug' => 'required|string'
         ]);
 
         if (strtoupper($request->captcha) !== session('download_captcha')) {
+            $this->rateLimitService->releaseSlot('download', session()->getId());
             return response()->json([
                 'success' => false,
                 'message' => 'Captcha is incorrect.'
@@ -67,6 +93,7 @@ class DownloadController extends Controller
         $file = UploadedFile::where('slug', $request->slug)->first();
 
         if (!$file) {
+            $this->rateLimitService->releaseSlot('download', session()->getId());
             return response()->json([
                 'success' => false,
                 'message' => 'File not found.'
@@ -75,6 +102,7 @@ class DownloadController extends Controller
 
         // Double check if file exists on 1Fichier
         if (!$this->checkFileExists($file)) {
+            $this->rateLimitService->releaseSlot('download', session()->getId());
             return response()->json([
                 'success' => false,
                 'message' => 'File not found or has been deleted.'
@@ -84,6 +112,7 @@ class DownloadController extends Controller
         $downloadUrl = $this->generateDownloadLink($file);
 
         if (!$downloadUrl) {
+            $this->rateLimitService->releaseSlot('download', session()->getId());
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to generate download link.'

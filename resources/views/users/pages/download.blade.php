@@ -9,6 +9,16 @@
         <h3><i class="fa-solid fa-download text-success"></i> Download Your Files</h3>
         <p class="text-muted">Click download to get your files</p>
         
+        <!-- Download Queue Status (hidden initially) -->
+        <div id="downloadQueueStatus" style="display:none; background:#fff3cd; border:1px solid #ffeaa7; border-radius:6px; padding:15px; margin-bottom:20px;">
+            <h5><i class="fa-solid fa-clock"></i> Download Queue</h5>
+            <div id="downloadQueueMessage">Please wait for your turn...</div>
+            <div class="progress mt-2" style="height:10px;">
+                <div id="downloadQueueProgress" class="progress-bar progress-bar-striped progress-bar-animated" style="width:0%"></div>
+            </div>
+            <small id="downloadQueueDetails" class="text-muted"></small>
+        </div>
+        
         <ul class="list-group mt-4 text-start">
             @foreach($files as $file)
                 <li class="list-group-item d-flex justify-content-between align-items-center">
@@ -19,7 +29,7 @@
                     </div>
 
                     <div class="btn-group">
-                        <button class="btn btn-success btn-sm" 
+                        <button class="btn btn-success btn-sm download-btn" 
                                 data-bs-toggle="modal" 
                                 data-bs-target="#captchaModal"
                                 data-slug="{{ $file->slug }}">
@@ -87,6 +97,9 @@
 </div>
 
 <script>
+let downloadQueueCheckInterval = null;
+let currentDownloadSlug = '';
+
 // Toast functions
 function showSuccessToast(message) {
     const toastEl = document.getElementById('successToast');
@@ -148,7 +161,31 @@ function refreshCaptcha() {
     });
 }
 
-function verifyAndDownload() {
+function showDownloadQueueStatus(position, current, limit) {
+    document.getElementById('downloadQueueStatus').style.display = 'block';
+    document.querySelectorAll('.download-btn').forEach(btn => {
+        btn.disabled = true;
+    });
+    
+    const progressPercent = Math.min(100, ((position - 1) / limit) * 100);
+    document.getElementById('downloadQueueProgress').style.width = progressPercent + '%';
+    document.getElementById('downloadQueueMessage').innerHTML = `<strong>Queue Position: ${position}</strong> - Please wait for your turn...`;
+    document.getElementById('downloadQueueDetails').innerText = `${current} active users / ${limit} slots available`;
+}
+
+function hideDownloadQueueStatus() {
+    document.getElementById('downloadQueueStatus').style.display = 'none';
+    document.querySelectorAll('.download-btn').forEach(btn => {
+        btn.disabled = false;
+    });
+    
+    if (downloadQueueCheckInterval) {
+        clearInterval(downloadQueueCheckInterval);
+        downloadQueueCheckInterval = null;
+    }
+}
+
+async function verifyAndDownload() {
     const captcha = document.getElementById('captchaInput').value.trim();
     const slug = document.getElementById('currentFileSlug').value;
     const verifyBtn = document.getElementById('verifyBtn');
@@ -160,19 +197,21 @@ function verifyAndDownload() {
 
     // Show loading state
     const originalText = verifyBtn.innerHTML;
-    verifyBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Verifying...';
+    verifyBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Checking queue...';
     verifyBtn.disabled = true;
 
-    fetch('{{ route("download.verify-captcha") }}', {
-        method: 'POST',
-        headers: {
-            'X-CSRF-TOKEN': '{{ csrf_token() }}',
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({captcha: captcha, slug: slug})
-    })
-    .then(r => r.json())
-    .then(data => {
+    try {
+        const response = await fetch('{{ route("download.verify-captcha") }}', {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({captcha: captcha, slug: slug})
+        });
+
+        const data = await response.json();
+
         if (data.success) {
             // Create invisible iframe for download
             const iframe = document.createElement('iframe');
@@ -183,18 +222,30 @@ function verifyAndDownload() {
             // Close modal and show success
             bootstrap.Modal.getInstance(document.getElementById('captchaModal')).hide();
             showSuccessToast('Download started successfully!');
+            hideDownloadQueueStatus();
         } else {
-            showErrorToast(data.message);
-            refreshCaptcha();
+            if (data.queue_position) {
+                showDownloadQueueStatus(data.queue_position, data.current_users, data.limit);
+                currentDownloadSlug = slug;
+                
+                // Auto-retry every 5 seconds
+                if (!downloadQueueCheckInterval) {
+                    downloadQueueCheckInterval = setInterval(() => {
+                        document.getElementById('captchaInput').value = captcha;
+                        verifyAndDownload();
+                    }, 5000);
+                }
+            } else {
+                showErrorToast(data.message);
+                refreshCaptcha();
+            }
         }
-    })
-    .catch(error => {
+    } catch (error) {
         showErrorToast('Network error. Please try again.');
-    })
-    .finally(() => {
+    } finally {
         verifyBtn.innerHTML = originalText;
         verifyBtn.disabled = false;
-    });
+    }
 }
 
 // Modal show event
@@ -202,6 +253,7 @@ document.getElementById('captchaModal').addEventListener('show.bs.modal', functi
     const button = event.relatedTarget;
     document.getElementById('currentFileSlug').value = button.getAttribute('data-slug');
     document.getElementById('captchaInput').value = '';
+    hideDownloadQueueStatus();
     refreshCaptcha();
 });
 
@@ -233,6 +285,10 @@ document.getElementById('captchaInput').addEventListener('keypress', function(e)
 .toast {
     border-radius: 10px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+.progress-bar-striped {
+    background-image: linear-gradient(45deg, rgba(255,255,255,0.15) 25%, transparent 25%, transparent 50%, rgba(255,255,255,0.15) 50%, rgba(255,255,255,0.15) 75%, transparent 75%, transparent);
+    background-size: 1rem 1rem;
 }
 </style>
 @endsection
