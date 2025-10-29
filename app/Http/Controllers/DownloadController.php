@@ -18,7 +18,36 @@ class DownloadController extends Controller
             return view('users.pages.expired', ['message' => 'No valid files found.']);
         }
 
+        // Check each file if it exists on 1Fichier
+        foreach ($files as $file) {
+            if (!$this->checkFileExists($file)) {
+                return view('users.pages.expired', [
+                    'message' => 'File not found or has been deleted.'
+                ]);
+            }
+        }
+
         return view('users.pages.download', compact('files', 'slugs'));
+    }
+
+    private function checkFileExists($file)
+    {
+        $apiKey = env('ONEFICHIER_API_KEY');
+
+        try {
+            $response = Http::timeout(10)->withHeaders([
+                'Authorization' => 'Bearer ' . $apiKey,
+            ])->post('https://api.1fichier.com/v1/download/get_token.cgi', [
+                'url' => $file->download_url,
+                'inline' => 0,
+            ]);
+
+            $tokenData = $response->json();
+            return isset($tokenData['status']) && $tokenData['status'] === 'OK';
+
+        } catch (\Exception $e) {
+            return false;
+        }
     }
 
     public function verifyCaptcha(Request $request)
@@ -44,13 +73,20 @@ class DownloadController extends Controller
             ]);
         }
 
-        // Check if file exists on 1Fichier
+        // Double check if file exists on 1Fichier
+        if (!$this->checkFileExists($file)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'File not found or has been deleted.'
+            ]);
+        }
+
         $downloadUrl = $this->generateDownloadLink($file);
 
         if (!$downloadUrl) {
             return response()->json([
                 'success' => false,
-                'message' => 'File not found or expired.'
+                'message' => 'Failed to generate download link.'
             ]);
         }
 
