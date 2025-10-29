@@ -45,7 +45,8 @@ const PUSHER_CLUSTER = "{{ config('broadcasting.connections.pusher.options.clust
 
 let serverPercent = 0;
 let displayedSpeed = { value: 0 };
-const serverWeight = 0.5;
+// const serverWeight = 0.5;
+const serverWeight = Math.random() * 0.2 + 0.7;
 const browserWeight = 1 - serverWeight;
 
 const pusher = new Pusher(PUSHER_KEY, {
