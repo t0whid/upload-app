@@ -64,49 +64,62 @@
 </div>
 
 <!-- Toast Container -->
-<div class="toast-container position-fixed top-0 end-0 p-3">
-    <div id="liveToast" class="toast" role="alert">
-        <div class="toast-header">
-            <i class="fa-solid fa-check-circle text-success me-2"></i>
-            <strong class="me-auto">Success</strong>
-            <button type="button" class="btn-close" data-bs-dismiss="toast"></button>
+<div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 9999;">
+    <div id="successToast" class="toast align-items-center text-bg-success border-0" role="alert">
+        <div class="d-flex">
+            <div class="toast-body">
+                <i class="fa-solid fa-check-circle me-2"></i>
+                <span id="successMessage">Download started successfully!</span>
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
         </div>
-        <div class="toast-body" id="toastMessage">
-            Download started successfully!
+    </div>
+
+    <div id="errorToast" class="toast align-items-center text-bg-danger border-0" role="alert">
+        <div class="d-flex">
+            <div class="toast-body">
+                <i class="fa-solid fa-exclamation-circle me-2"></i>
+                <span id="errorMessage">Something went wrong!</span>
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
         </div>
     </div>
 </div>
 
 <script>
-// Toast function
-function showToast(message, type = 'success') {
-    const toastEl = document.getElementById('liveToast');
-    const toastMessage = document.getElementById('toastMessage');
-    const toastHeader = toastEl.querySelector('.toast-header i');
+// Toast functions
+function showSuccessToast(message) {
+    const toastEl = document.getElementById('successToast');
+    const toastMessage = document.getElementById('successMessage');
     
-    // Set message
     toastMessage.textContent = message;
     
-    // Set icon and color based on type
-    if (type === 'error') {
-        toastHeader.className = 'fa-solid fa-exclamation-circle text-danger me-2';
-        toastEl.querySelector('.toast-header strong').textContent = 'Error';
-    } else {
-        toastHeader.className = 'fa-solid fa-check-circle text-success me-2';
-        toastEl.querySelector('.toast-header strong').textContent = 'Success';
-    }
+    const toast = new bootstrap.Toast(toastEl, {
+        autohide: true,
+        delay: 3000
+    });
+    toast.show();
+}
+
+function showErrorToast(message) {
+    const toastEl = document.getElementById('errorToast');
+    const toastMessage = document.getElementById('errorMessage');
     
-    // Show toast
-    const toast = new bootstrap.Toast(toastEl);
+    toastMessage.textContent = message;
+    
+    const toast = new bootstrap.Toast(toastEl, {
+        autohide: true,
+        delay: 4000
+    });
     toast.show();
 }
 
 function copyDownloadLink(slug) {
     const downloadUrl = `{{ url('/download') }}/${slug}`;
     navigator.clipboard.writeText(downloadUrl).then(() => {
-        showToast('Link copied to clipboard!');
+        showSuccessToast('Link copied to clipboard!');
     }).catch(() => {
-        showToast('Failed to copy link', 'error');
+        showErrorToast('Failed to copy link');
     });
 }
 
@@ -127,6 +140,11 @@ function refreshCaptcha() {
         document.getElementById('captchaInput').value = '';
         refreshBtn.innerHTML = originalHtml;
         refreshBtn.disabled = false;
+        showSuccessToast('Captcha refreshed!');
+    }).catch(() => {
+        showErrorToast('Failed to refresh captcha');
+        refreshBtn.innerHTML = originalHtml;
+        refreshBtn.disabled = false;
     });
 }
 
@@ -136,7 +154,7 @@ function verifyAndDownload() {
     const verifyBtn = document.getElementById('verifyBtn');
 
     if (!captcha) {
-        showToast('Please enter captcha', 'error');
+        showErrorToast('Please enter captcha');
         return;
     }
 
@@ -164,14 +182,14 @@ function verifyAndDownload() {
             
             // Close modal and show success
             bootstrap.Modal.getInstance(document.getElementById('captchaModal')).hide();
-            showToast('Download started successfully!');
+            showSuccessToast('Download started successfully!');
         } else {
-            showToast(data.message, 'error');
+            showErrorToast(data.message);
             refreshCaptcha();
         }
     })
     .catch(error => {
-        showToast('Network error. Please try again.', 'error');
+        showErrorToast('Network error. Please try again.');
     })
     .finally(() => {
         verifyBtn.innerHTML = originalText;
@@ -186,6 +204,13 @@ document.getElementById('captchaModal').addEventListener('show.bs.modal', functi
     document.getElementById('captchaInput').value = '';
     refreshCaptcha();
 });
+
+// Enter key support in captcha input
+document.getElementById('captchaInput').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+        verifyAndDownload();
+    }
+});
 </script>
 
 <style>
@@ -195,10 +220,19 @@ document.getElementById('captchaModal').addEventListener('show.bs.modal', functi
 }
 .btn-success:hover {
     background: linear-gradient(45deg, #218838, #1e9e8a);
+    transform: translateY(-1px);
+}
+.btn-outline-primary {
+    border-color: #007bff;
+    color: #007bff;
+}
+.btn-outline-primary:hover {
+    background: #007bff;
+    color: white;
 }
 .toast {
-    background: white;
-    border-left: 4px solid #28a745;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
 }
 </style>
 @endsection
