@@ -38,9 +38,9 @@
 
                 <div class="d-flex align-items-center gap-3">
                     <a href="{{route('upload.form')}}" class="btn btn-upload">Upload</a>
-                    <button class="theme-toggle" type="button" aria-label="Theme Toggle">
+                    {{-- <button class="theme-toggle" type="button" aria-label="Theme Toggle">
                         <i class="bi bi-moon-stars"></i>
-                    </button>
+                    </button> --}}
                 </div>
             </div>
         </div>

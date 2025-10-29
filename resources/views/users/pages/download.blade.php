@@ -2,72 +2,145 @@
 @section('title', 'Download Files')
 
 @section('content')
-<div class="hosting" style="margin: 40px auto; max-width: 750px;">
-    <img src="{{ asset('images/icon.svg') }}" alt="icon" class="top-icon">
-
-    <div class="upload-card text-center">
-        <h3><i class="fa-solid fa-download text-success"></i> Download Your Files</h3>
-        <p class="text-muted">Click download to get your files</p>
-        
-        <!-- Download Queue Status (hidden initially) -->
-        <div id="downloadQueueStatus" style="display:none; background:#fff3cd; border:1px solid #ffeaa7; border-radius:6px; padding:15px; margin-bottom:20px;">
-            <h5><i class="fa-solid fa-clock"></i> Download Queue</h5>
-            <div id="downloadQueueMessage">Please wait for your turn...</div>
-            <div class="progress mt-2" style="height:10px;">
-                <div id="downloadQueueProgress" class="progress-bar progress-bar-striped progress-bar-animated" style="width:0%"></div>
+<div class="download-page" style="background: #15182F; min-height: 100vh; padding: 40px 0;">
+    <div class="container" style="max-width: 800px;">
+        <!-- Header Section -->
+        <div class="text-center mb-5">
+            <div class="icon-container mb-4">
+                <div class="icon-wrapper" style="
+                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    width: 80px;
+                    height: 80px;
+                    border-radius: 20px;
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                    box-shadow: 0 8px 32px rgba(102, 126, 234, 0.3);
+                    animation: float 3s ease-in-out infinite;
+                ">
+                    <i class="fa-solid fa-download text-white" style="font-size: 2rem;"></i>
+                </div>
             </div>
-            <small id="downloadQueueDetails" class="text-muted"></small>
+            <h1 class="text-white mb-3" style="font-weight: 700; font-size: 2.5rem;">Download Your Files</h1>
+            <p class="text-light" style="font-size: 1.1rem; opacity: 0.8;">Ready to download your secured files</p>
         </div>
-        
-        <ul class="list-group mt-4 text-start">
-            @foreach($files as $file)
-                <li class="list-group-item d-flex justify-content-between align-items-center">
-                    <div class="file-info">
-                        <strong>{{ $file->filename }}</strong>
-                        <br>
-                        <small class="text-muted">{{ number_format($file->size / 1024 / 1024, 2) }} MB</small>
-                    </div>
 
-                    <div class="btn-group">
-                        <button class="btn btn-success btn-sm download-btn" 
-                                data-bs-toggle="modal" 
-                                data-bs-target="#captchaModal"
-                                data-slug="{{ $file->slug }}">
-                            <i class="fa-solid fa-download"></i> Download
-                        </button>
-
-                        <button class="btn btn-outline-primary btn-sm" 
-                                onclick="copyDownloadLink('{{ $file->slug }}')">
-                            <i class="fa-solid fa-copy"></i> Copy
-                        </button>
-                    </div>
-                </li>
-            @endforeach
-        </ul>
-    </div>
-</div>
-
-<!-- Captcha Modal -->
-<div class="modal fade" id="captchaModal" tabindex="-1">
-    <div class="modal-dialog modal-sm">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Verify Captcha</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body text-center">
-                <img src="{{ route('download.captcha') }}" alt="Captcha" id="captchaImage" 
-                     class="img-fluid border rounded">
-                <button type="button" onclick="refreshCaptcha()" class="btn btn-sm btn-outline-secondary mt-2">
-                    <i class="fa-solid fa-rotate"></i> Refresh
-                </button>
-
-                <input type="text" id="captchaInput" class="form-control my-3" placeholder="Enter captcha here">
-                <input type="hidden" id="currentFileSlug">
+        <!-- Files List -->
+        <div class="files-container">
+            @foreach ($files as $file)
+            <div class="file-card" style="
+                background: rgba(255, 255, 255, 0.05);
+                backdrop-filter: blur(10px);
+                border: 1px solid rgba(255, 255, 255, 0.1);
+                border-radius: 16px;
+                padding: 24px;
+                margin-bottom: 20px;
+                transition: all 0.3s ease;
+                position: relative;
+                overflow: hidden;
+            ">
+                <!-- Background Pattern -->
+                <div class="card-pattern" style="
+                    position: absolute;
+                    top: 0;
+                    right: 0;
+                    width: 120px;
+                    height: 120px;
+                    background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+                    border-radius: 0 16px 0 100px;
+                    z-index: 0;
+                "></div>
                 
-                <button type="button" class="btn btn-success w-100" onclick="verifyAndDownload()" id="verifyBtn">
-                    <i class="fa-solid fa-check"></i> Verify & Download
-                </button>
+                <div class="file-content" style="position: relative; z-index: 1;">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <div class="file-info">
+                                <div class="file-icon mb-2">
+                                    <i class="fa-solid fa-file" style="
+                                        color: #667eea;
+                                        font-size: 1.5rem;
+                                        margin-right: 12px;
+                                    "></i>
+                                </div>
+                                <h5 class="text-white mb-2" style="font-weight: 600;">{{ $file->filename }}</h5>
+                                <div class="file-meta">
+                                    <span class="badge" style="
+                                        background: rgba(102, 126, 234, 0.2);
+                                        color: #667eea;
+                                        padding: 6px 12px;
+                                        border-radius: 20px;
+                                        font-size: 0.85rem;
+                                    ">
+                                        <i class="fa-solid fa-hard-drive me-1"></i>
+                                        {{ number_format($file->size / 1024 / 1024, 2) }} MB
+                                    </span>
+                                    <span class="badge ms-2" style="
+                                        background: rgba(40, 167, 69, 0.2);
+                                        color: #28a745;
+                                        padding: 6px 12px;
+                                        border-radius: 20px;
+                                        font-size: 0.85rem;
+                                    ">
+                                        <i class="fa-solid fa-check me-1"></i>
+                                        Ready
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 text-end">
+                            <div class="action-buttons">
+                                <button class="btn btn-download me-2" onclick="openSingleDownloadPage('{{ $file->slug }}')" style="
+                                    background: linear-gradient(135deg, #28a745, #20c997);
+                                    border: none;
+                                    color: white;
+                                    padding: 10px 20px;
+                                    border-radius: 10px;
+                                    font-weight: 600;
+                                    transition: all 0.3s ease;
+                                    box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+                                ">
+                                    <i class="fa-solid fa-download me-2"></i>
+                                    Download
+                                </button>
+                                <button class="btn btn-copy" onclick="copyDownloadLink('{{ $file->slug }}')" style="
+                                    background: rgba(255, 255, 255, 0.1);
+                                    border: 1px solid rgba(255, 255, 255, 0.2);
+                                    color: #fff;
+                                    padding: 10px 15px;
+                                    border-radius: 10px;
+                                    transition: all 0.3s ease;
+                                ">
+                                    <i class="fa-solid fa-copy"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            @endforeach
+        </div>
+
+        <!-- Stats Section -->
+        <div class="stats-section mt-5 text-center">
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="stat-item text-white">
+                        <h3 style="font-weight: 700; color: #667eea;">{{ count($files) }}</h3>
+                        <p style="opacity: 0.8;">Total Files</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="stat-item text-white">
+                        <h3 style="font-weight: 700; color: #28a745;">{{ number_format(array_sum(array_column($files->toArray(), 'size')) / 1024 / 1024, 1) }} MB</h3>
+                        <p style="opacity: 0.8;">Total Size</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="stat-item text-white">
+                        <h3 style="font-weight: 700; color: #20c997;">100%</h3>
+                        <p style="opacity: 0.8;">Secure</p>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -75,220 +148,137 @@
 
 <!-- Toast Container -->
 <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 9999;">
-    <div id="successToast" class="toast align-items-center text-bg-success border-0" role="alert">
+    <div id="successToast" class="toast" style="
+        background: linear-gradient(135deg, #28a745, #20c997);
+        border: none;
+        border-radius: 12px;
+        color: white;
+    ">
         <div class="d-flex">
-            <div class="toast-body">
-                <i class="fa-solid fa-check-circle me-2"></i>
-                <span id="successMessage">Download started successfully!</span>
+            <div class="toast-body d-flex align-items-center">
+                <i class="fa-solid fa-check-circle me-2" style="font-size: 1.2rem;"></i>
+                <span id="successMessage" style="font-weight: 500;">Success</span>
             </div>
-            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+            <button type="button" class="btn-close btn-close-white m-3" data-bs-dismiss="toast"></button>
         </div>
     </div>
 
-    <div id="errorToast" class="toast align-items-center text-bg-danger border-0" role="alert">
+    <div id="errorToast" class="toast" style="
+        background: linear-gradient(135deg, #dc3545, #c82333);
+        border: none;
+        border-radius: 12px;
+        color: white;
+    ">
         <div class="d-flex">
-            <div class="toast-body">
-                <i class="fa-solid fa-exclamation-circle me-2"></i>
-                <span id="errorMessage">Something went wrong!</span>
+            <div class="toast-body d-flex align-items-center">
+                <i class="fa-solid fa-exclamation-circle me-2" style="font-size: 1.2rem;"></i>
+                <span id="errorMessage" style="font-weight: 500;">Error</span>
             </div>
-            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+            <button type="button" class="btn-close btn-close-white m-3" data-bs-dismiss="toast"></button>
         </div>
     </div>
 </div>
 
 <script>
-let downloadQueueCheckInterval = null;
-let currentDownloadSlug = '';
-
-// Toast functions
-function showSuccessToast(message) {
-    const toastEl = document.getElementById('successToast');
-    const toastMessage = document.getElementById('successMessage');
-    
-    toastMessage.textContent = message;
-    
-    const toast = new bootstrap.Toast(toastEl, {
-        autohide: true,
-        delay: 3000
-    });
-    toast.show();
-}
-
-function showErrorToast(message) {
-    const toastEl = document.getElementById('errorToast');
-    const toastMessage = document.getElementById('errorMessage');
-    
-    toastMessage.textContent = message;
-    
-    const toast = new bootstrap.Toast(toastEl, {
-        autohide: true,
-        delay: 4000
-    });
-    toast.show();
-}
-
-function copyDownloadLink(slug) {
-    const downloadUrl = `{{ url('/download') }}/${slug}`;
-    navigator.clipboard.writeText(downloadUrl).then(() => {
-        showSuccessToast('Link copied to clipboard!');
-    }).catch(() => {
-        showErrorToast('Failed to copy link');
-    });
-}
-
-function refreshCaptcha() {
-    const refreshBtn = document.querySelector('#captchaModal .btn-outline-secondary');
-    const originalHtml = refreshBtn.innerHTML;
-    
-    refreshBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Refreshing';
-    refreshBtn.disabled = true;
-
-    fetch('{{ route("download.refresh-captcha") }}', {
-        method: 'POST',
-        headers: {
-            'X-CSRF-TOKEN': '{{ csrf_token() }}',
-        }
-    }).then(() => {
-        document.getElementById('captchaImage').src = '{{ route("download.captcha") }}?t=' + Date.now();
-        document.getElementById('captchaInput').value = '';
-        refreshBtn.innerHTML = originalHtml;
-        refreshBtn.disabled = false;
-        showSuccessToast('Captcha refreshed!');
-    }).catch(() => {
-        showErrorToast('Failed to refresh captcha');
-        refreshBtn.innerHTML = originalHtml;
-        refreshBtn.disabled = false;
-    });
-}
-
-function showDownloadQueueStatus(position, current, limit) {
-    document.getElementById('downloadQueueStatus').style.display = 'block';
-    document.querySelectorAll('.download-btn').forEach(btn => {
-        btn.disabled = true;
-    });
-    
-    const progressPercent = Math.min(100, ((position - 1) / limit) * 100);
-    document.getElementById('downloadQueueProgress').style.width = progressPercent + '%';
-    document.getElementById('downloadQueueMessage').innerHTML = `<strong>Queue Position: ${position}</strong> - Please wait for your turn...`;
-    document.getElementById('downloadQueueDetails').innerText = `${current} active users / ${limit} slots available`;
-}
-
-function hideDownloadQueueStatus() {
-    document.getElementById('downloadQueueStatus').style.display = 'none';
-    document.querySelectorAll('.download-btn').forEach(btn => {
-        btn.disabled = false;
-    });
-    
-    if (downloadQueueCheckInterval) {
-        clearInterval(downloadQueueCheckInterval);
-        downloadQueueCheckInterval = null;
-    }
-}
-
-async function verifyAndDownload() {
-    const captcha = document.getElementById('captchaInput').value.trim();
-    const slug = document.getElementById('currentFileSlug').value;
-    const verifyBtn = document.getElementById('verifyBtn');
-
-    if (!captcha) {
-        showErrorToast('Please enter captcha');
-        return;
+    function showSuccessToast(message) {
+        document.getElementById('successMessage').innerText = message;
+        const toast = new bootstrap.Toast(document.getElementById('successToast'));
+        toast.show();
     }
 
-    // Show loading state
-    const originalText = verifyBtn.innerHTML;
-    verifyBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Checking queue...';
-    verifyBtn.disabled = true;
+    function showErrorToast(message) {
+        document.getElementById('errorMessage').innerText = message;
+        const toast = new bootstrap.Toast(document.getElementById('errorToast'));
+        toast.show();
+    }
 
-    try {
-        const response = await fetch('{{ route("download.verify-captcha") }}', {
-            method: 'POST',
-            headers: {
-                'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({captcha: captcha, slug: slug})
+    function copyDownloadLink(slug) {
+        const url = `{{ url('/download/single') }}/${slug}`;
+        navigator.clipboard.writeText(url)
+            .then(() => showSuccessToast('Download link copied to clipboard!'))
+            .catch(() => showErrorToast('Failed to copy link'));
+    }
+
+    function openSingleDownloadPage(slug) {
+        window.open(`{{ url('/download/single') }}/${slug}`, '_blank');
+    }
+
+    // Add hover effects
+    document.addEventListener('DOMContentLoaded', function() {
+        const fileCards = document.querySelectorAll('.file-card');
+        fileCards.forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-5px)';
+                this.style.boxShadow = '0 12px 40px rgba(0, 0, 0, 0.3)';
+                this.style.borderColor = 'rgba(102, 126, 234, 0.3)';
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0)';
+                this.style.boxShadow = 'none';
+                this.style.borderColor = 'rgba(255, 255, 255, 0.1)';
+            });
         });
 
-        const data = await response.json();
-
-        if (data.success) {
-            // Create invisible iframe for download
-            const iframe = document.createElement('iframe');
-            iframe.style.display = 'none';
-            iframe.src = data.download_url;
-            document.body.appendChild(iframe);
+        // Add button hover effects
+        const downloadButtons = document.querySelectorAll('.btn-download');
+        downloadButtons.forEach(btn => {
+            btn.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-2px)';
+                this.style.boxShadow = '0 6px 20px rgba(40, 167, 69, 0.4)';
+            });
             
-            // Close modal and show success
-            bootstrap.Modal.getInstance(document.getElementById('captchaModal')).hide();
-            showSuccessToast('Download started successfully!');
-            hideDownloadQueueStatus();
-        } else {
-            if (data.queue_position) {
-                showDownloadQueueStatus(data.queue_position, data.current_users, data.limit);
-                currentDownloadSlug = slug;
-                
-                // Auto-retry every 5 seconds
-                if (!downloadQueueCheckInterval) {
-                    downloadQueueCheckInterval = setInterval(() => {
-                        document.getElementById('captchaInput').value = captcha;
-                        verifyAndDownload();
-                    }, 5000);
-                }
-            } else {
-                showErrorToast(data.message);
-                refreshCaptcha();
-            }
-        }
-    } catch (error) {
-        showErrorToast('Network error. Please try again.');
-    } finally {
-        verifyBtn.innerHTML = originalText;
-        verifyBtn.disabled = false;
-    }
-}
+            btn.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0)';
+                this.style.boxShadow = '0 4px 15px rgba(40, 167, 69, 0.3)';
+            });
+        });
 
-// Modal show event
-document.getElementById('captchaModal').addEventListener('show.bs.modal', function (event) {
-    const button = event.relatedTarget;
-    document.getElementById('currentFileSlug').value = button.getAttribute('data-slug');
-    document.getElementById('captchaInput').value = '';
-    hideDownloadQueueStatus();
-    refreshCaptcha();
-});
-
-// Enter key support in captcha input
-document.getElementById('captchaInput').addEventListener('keypress', function(e) {
-    if (e.key === 'Enter') {
-        verifyAndDownload();
-    }
-});
+        const copyButtons = document.querySelectorAll('.btn-copy');
+        copyButtons.forEach(btn => {
+            btn.addEventListener('mouseenter', function() {
+                this.style.background = 'rgba(255, 255, 255, 0.2)';
+                this.style.transform = 'translateY(-2px)';
+            });
+            
+            btn.addEventListener('mouseleave', function() {
+                this.style.background = 'rgba(255, 255, 255, 0.1)';
+                this.style.transform = 'translateY(0)';
+            });
+        });
+    });
 </script>
 
 <style>
-.btn-success {
-    background: linear-gradient(45deg, #28a745, #20c997);
-    border: none;
-}
-.btn-success:hover {
-    background: linear-gradient(45deg, #218838, #1e9e8a);
-    transform: translateY(-1px);
-}
-.btn-outline-primary {
-    border-color: #007bff;
-    color: #007bff;
-}
-.btn-outline-primary:hover {
-    background: #007bff;
-    color: white;
-}
-.toast {
-    border-radius: 10px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-}
-.progress-bar-striped {
-    background-image: linear-gradient(45deg, rgba(255,255,255,0.15) 25%, transparent 25%, transparent 50%, rgba(255,255,255,0.15) 50%, rgba(255,255,255,0.15) 75%, transparent 75%, transparent);
-    background-size: 1rem 1rem;
-}
+    @keyframes float {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-10px); }
+    }
+
+    .file-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3) !important;
+        border-color: rgba(102, 126, 234, 0.3) !important;
+    }
+
+    .btn-download:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4) !important;
+    }
+
+    .btn-copy:hover {
+        background: rgba(255, 255, 255, 0.2) !important;
+        transform: translateY(-2px);
+    }
+
+    body {
+        background: #151820;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .toast {
+        backdrop-filter: blur(10px);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    }
 </style>
 @endsection

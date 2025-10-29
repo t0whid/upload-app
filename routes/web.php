@@ -15,3 +15,4 @@ Route::get('/download/{slugs}', [DownloadController::class, 'show'])->name('down
 Route::post('/download/verify-captcha', [DownloadController::class, 'verifyCaptcha'])->name('download.verify-captcha');
 Route::get('/captcha/image', [DownloadController::class, 'getCaptcha'])->name('download.captcha');
 Route::post('/captcha/refresh', [DownloadController::class, 'refreshCaptcha'])->name('download.refresh-captcha');
+Route::get('/download/single/{slug}', [DownloadController::class, 'showSingle'])->name('download.single');
