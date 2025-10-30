@@ -1,6 +1,9 @@
 <?php
 
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Request;
+use App\Http\Controllers\FileController;
 use App\Http\Controllers\UploadController;
 use App\Http\Controllers\DownloadController;
 
@@ -16,3 +19,9 @@ Route::post('/download/verify-captcha', [DownloadController::class, 'verifyCaptc
 Route::get('/captcha/image', [DownloadController::class, 'getCaptcha'])->name('download.captcha');
 Route::post('/captcha/refresh', [DownloadController::class, 'refreshCaptcha'])->name('download.refresh-captcha');
 Route::get('/download/single/{slug}', [DownloadController::class, 'showSingle'])->name('download.single');
+
+Route::get('/generates', [FileController::class, 'showForm'])->name('file.form');
+Route::post('/generates', [FileController::class, 'generate'])->name('file.generate');
+Route::post('/generates-bulk', [FileController::class, 'generateBulk'])->name('file.generate-bulk');
+Route::get('/downloads/{slug}', [FileController::class, 'download'])->name('file.download');
+Route::post('/verify-download', [FileController::class, 'verifyAndDownload'])->name('file.verify-download');

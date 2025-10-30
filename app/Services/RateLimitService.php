@@ -60,12 +60,12 @@ class RateLimitService
     public function getLimit($type)
     {
         if ($type === 'upload') {
-            return (int) env('UPLOAD_RATE_LIMIT', 2);
+            return (int) env('UPLOAD_RATE_LIMIT', 100);
         } elseif ($type === 'download') {
-            return (int) env('DOWNLOAD_RATE_LIMIT', 2);
+            return (int) env('DOWNLOAD_RATE_LIMIT', 100);
         }
         
-        return 2;
+        return 100;
     }
     
     public function getCurrentStats($type)

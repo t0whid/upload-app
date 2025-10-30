@@ -9,7 +9,8 @@
             <!-- Header Section -->
             <div class="text-center mb-5">
                 <div class="upload-icon mb-4">
-                    <div class="icon-wrapper" style="
+                    <div class="icon-wrapper"
+                        style="
                         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
                         width: 100px;
                         height: 100px;
@@ -23,7 +24,8 @@
                         overflow: hidden;
                     ">
                         <i class="fa-solid fa-cloud-upload-alt text-white" style="font-size: 2.5rem; z-index: 2;"></i>
-                        <div class="icon-shine" style="
+                        <div class="icon-shine"
+                            style="
                             position: absolute;
                             top: -50%;
                             left: -50%;
@@ -31,7 +33,8 @@
                             height: 200%;
                             background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
                             transform: rotate(45deg);
-                        "></div>
+                        ">
+                        </div>
                     </div>
                 </div>
                 <h1 class="text-white mb-3" style="font-weight: 700; font-size: 2.8rem; letter-spacing: -0.5px;">
@@ -43,7 +46,8 @@
             </div>
 
             <!-- Upload Card -->
-            <div class="upload-card" style="
+            <div class="upload-card"
+                style="
                 background: rgba(255, 255, 255, 0.05);
                 backdrop-filter: blur(20px);
                 border: 1px solid rgba(255, 255, 255, 0.1);
@@ -54,7 +58,8 @@
                 overflow: hidden;
             ">
                 <!-- Background Pattern -->
-                <div class="card-pattern" style="
+                <div class="card-pattern"
+                    style="
                     position: absolute;
                     top: 0;
                     right: 0;
@@ -63,11 +68,13 @@
                     background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
                     border-radius: 0 20px 0 120px;
                     z-index: 0;
-                "></div>
+                ">
+                </div>
 
                 <div class="card-content" style="position: relative; z-index: 1;">
                     <!-- Queue Status -->
-                    <div id="queueStatus" class="queue-status" style="
+                    <div id="queueStatus" class="queue-status"
+                        style="
                         display: none;
                         background: linear-gradient(135deg, rgba(255, 243, 205, 0.9), rgba(255, 234, 167, 0.9));
                         border: 1px solid rgba(255, 193, 7, 0.3);
@@ -83,7 +90,8 @@
                         <div id="queueMessage" style="color: #856404; font-size: 1rem; margin-bottom: 15px;">
                             Please wait for your turn...
                         </div>
-                        <div class="progress" style="height: 12px; border-radius: 10px; background: rgba(133, 100, 4, 0.2);">
+                        <div class="progress"
+                            style="height: 12px; border-radius: 10px; background: rgba(133, 100, 4, 0.2);">
                             <div id="queueProgress" class="progress-bar progress-bar-striped progress-bar-animated"
                                 style="width: 0%; background: linear-gradient(135deg, #ffc107, #ffb300); border-radius: 10px;">
                             </div>
@@ -97,7 +105,8 @@
                     <div id="uploadForm">
                         <div class="file-input-container mb-4">
                             <input type="file" id="fileInput" multiple accept=".zip" required style="display: none;">
-                            <label for="fileInput" class="custom-file-label" id="fileLabel" style="
+                            <label for="fileInput" class="custom-file-label" id="fileLabel"
+                                style="
                                 display: block;
                                 background: rgba(255, 255, 255, 0.1);
                                 border: 2px dashed rgba(255, 255, 255, 0.3);
@@ -121,7 +130,8 @@
                             </label>
                         </div>
 
-                        <button id="uploadBtn" class="btn btn-upload w-100" type="submit" style="
+                        <button id="uploadBtn" class="btn btn-upload w-100" type="submit"
+                            style="
                             background: linear-gradient(135deg, #28a745, #20c997);
                             border: none;
                             color: white;
@@ -136,7 +146,8 @@
                         ">
                             <i class="fa-solid fa-rocket me-2"></i>
                             Start Upload
-                            <div class="btn-shine" style="
+                            <div class="btn-shine"
+                                style="
                                 position: absolute;
                                 top: -50%;
                                 left: -50%;
@@ -145,7 +156,8 @@
                                 background: linear-gradient(45deg, transparent, rgba(255,255,255,0.2), transparent);
                                 transform: rotate(45deg);
                                 transition: all 0.5s ease;
-                            "></div>
+                            ">
+                            </div>
                         </button>
 
                         <div class="upload-info text-center mt-3">
@@ -163,7 +175,8 @@
                                 <i class="fa-solid fa-chart-line me-2"></i>
                                 Upload Progress
                             </h5>
-                            <span id="fileCounter" class="badge" style="
+                            <span id="fileCounter" class="badge"
+                                style="
                                 background: rgba(102, 126, 234, 0.3);
                                 color: #667eea;
                                 padding: 8px 15px;
@@ -171,8 +184,9 @@
                                 font-size: 0.9rem;
                             ">0/0</span>
                         </div>
-                        
-                        <div class="progress-container" style="
+
+                        <div class="progress-container"
+                            style="
                             background: rgba(255, 255, 255, 0.1);
                             border-radius: 15px;
                             overflow: hidden;
@@ -180,7 +194,8 @@
                             margin-bottom: 15px;
                             position: relative;
                         ">
-                            <div id="combinedProgress" class="progress-bar" style="
+                            <div id="combinedProgress" class="progress-bar"
+                                style="
                                 height: 100%;
                                 width: 0%;
                                 background: linear-gradient(135deg, #28a745, #20c997);
@@ -193,7 +208,8 @@
                                 position: relative;
                                 overflow: hidden;
                             ">
-                                <div class="progress-shine" style="
+                                <div class="progress-shine"
+                                    style="
                                     position: absolute;
                                     top: 0;
                                     left: -100%;
@@ -201,11 +217,12 @@
                                     height: 100%;
                                     background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
                                     animation: shine 2s infinite;
-                                "></div>
+                                ">
+                                </div>
                                 0%
                             </div>
                         </div>
-                        
+
                         <div class="progress-stats d-flex justify-content-between align-items-center">
                             <div id="combinedSpeed" class="text-light" style="font-size: 0.9rem; opacity: 0.8;">
                                 <i class="fa-solid fa-gauge-high me-1"></i>
@@ -225,7 +242,8 @@
                     <div class="col-md-4 mb-4">
                         <div class="feature-item text-white">
                             <div class="feature-icon mb-3">
-                                <i class="fa-solid fa-lock" style="
+                                <i class="fa-solid fa-lock"
+                                    style="
                                     font-size: 2rem;
                                     color: #28a745;
                                     background: rgba(40, 167, 69, 0.1);
@@ -240,7 +258,8 @@
                     <div class="col-md-4 mb-4">
                         <div class="feature-item text-white">
                             <div class="feature-icon mb-3">
-                                <i class="fa-solid fa-bolt" style="
+                                <i class="fa-solid fa-bolt"
+                                    style="
                                     font-size: 2rem;
                                     color: #ffc107;
                                     background: rgba(255, 193, 7, 0.1);
@@ -255,7 +274,8 @@
                     <div class="col-md-4 mb-4">
                         <div class="feature-item text-white">
                             <div class="feature-icon mb-3">
-                                <i class="fa-solid fa-infinity" style="
+                                <i class="fa-solid fa-infinity"
+                                    style="
                                     font-size: 2rem;
                                     color: #667eea;
                                     background: rgba(102, 126, 234, 0.1);
@@ -282,7 +302,9 @@
         const PUSHER_CLUSTER = "{{ config('broadcasting.connections.pusher.options.cluster') }}";
 
         let serverPercent = 0;
-        let displayedSpeed = { value: 0 };
+        let displayedSpeed = {
+            value: 0
+        };
         //const serverWeight = Math.random() * 0.2 + 0.7;
         const serverWeight = Math.random() * 0.2 + 0.4;
         const browserWeight = 1 - serverWeight;
@@ -294,9 +316,22 @@
         const channel = pusher.subscribe('upload-progress');
         channel.bind('progress-updated', function(data) {
             serverPercent = data.percent;
-            smoothSpeedDisplay(data.speed * 1024, 'KB/s');
+
+            let speedBytes = data.speed * 1024 * 1024; // Convert MB/s to Bytes/s
+            let speedKB = speedBytes / 1024;
+            let speedMB = speedBytes / 1024 / 1024;
+
+            if (speedMB >= 1) {
+                // Show MB/s
+                smoothSpeedDisplay(speedMB, 'MB/s');
+            } else {
+                // Show KB/s
+                smoothSpeedDisplay(speedKB, 'KB/s');
+            }
+
             updateCombinedProgress();
         });
+
 
         let currentFileIndex = 0;
         let totalFiles = 0;
@@ -378,7 +413,7 @@
         function smoothSpeedDisplay(target, unit = 'KB/s') {
             const animate = () => {
                 displayedSpeed.value += (target - displayedSpeed.value) * 0.1;
-                document.getElementById('combinedSpeed').innerHTML = 
+                document.getElementById('combinedSpeed').innerHTML =
                     `<i class="fa-solid fa-gauge-high me-1"></i>Speed: ${displayedSpeed.value.toFixed(2)} ${unit}`;
                 if (Math.abs(displayedSpeed.value - target) > 0.01) requestAnimationFrame(animate);
             };
@@ -511,7 +546,7 @@
                 this.style.transform = 'translateY(-2px)';
                 this.style.boxShadow = '0 12px 30px rgba(40, 167, 69, 0.4)';
             });
-            
+
             uploadBtn.addEventListener('mouseleave', function() {
                 this.style.transform = 'translateY(0)';
                 this.style.boxShadow = '0 8px 25px rgba(40, 167, 69, 0.3)';
@@ -521,7 +556,7 @@
                 this.style.background = 'rgba(255, 255, 255, 0.15)';
                 this.style.borderColor = 'rgba(255, 255, 255, 0.4)';
             });
-            
+
             fileLabel.addEventListener('mouseleave', function() {
                 this.style.background = 'rgba(255, 255, 255, 0.1)';
                 this.style.borderColor = 'rgba(255, 255, 255, 0.3)';
@@ -531,13 +566,25 @@
 
     <style>
         @keyframes float {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-10px); }
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-10px);
+            }
         }
 
         @keyframes shine {
-            0% { transform: translateX(-100%); }
-            100% { transform: translateX(200%); }
+            0% {
+                transform: translateX(-100%);
+            }
+
+            100% {
+                transform: translateX(200%);
+            }
         }
 
         .btn-upload:hover .btn-shine {
