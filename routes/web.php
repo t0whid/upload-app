@@ -22,9 +22,13 @@ Route::get('/download/single/{slug}', [DownloadController::class, 'showSingle'])
 
 Route::get('/generates', [FileController::class, 'showForm'])->name('file.form');
 Route::post('/generates', [FileController::class, 'generate'])->name('file.generate');
+Route::post('/generates-links', [FileController::class, 'generateLinks'])->name('file.generate-links');
+
 Route::post('/generates-bulk', [FileController::class, 'generateBulk'])->name('file.generate-bulk');
 Route::get('/downloads/{slug}', [FileController::class, 'download'])->name('file.download');
 Route::post('/verify-download', [FileController::class, 'verifyAndDownload'])->name('file.verify-download');
+Route::get('/bulk-display', [FileController::class, 'bulkDisplay'])->name('file.bulk-display'); // NEW
+Route::get('/links-display', [FileController::class, 'linksDisplay'])->name('file.links-display');
 
 /* use Illuminate\Support\Facades\Artisan;
 

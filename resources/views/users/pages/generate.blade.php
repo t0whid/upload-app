@@ -1,64 +1,44 @@
-y{{-- resources/views/users/pages/generate.blade.php --}}
+{{-- resources/views/users/pages/generate.blade.php --}}
 @extends('users.layouts.master')
-@section('title', 'Generate Download Link')
+@section('title', 'Generate Download Links')
 @section('content')
 <style>
-    /* Your existing CSS remains the same */
     :root {
         --primary: #6366f1;
         --primary-dark: #4f46e5;
         --success: #10b981;
-        --dark: #1f2937;
-        --light: #f8fafc;
-    }
-
-    .light-theme {
-        --bg-primary: #ffffff;
-        --bg-secondary: #f8f9fa;
-        --text-primary: #000000;
-        --text-secondary: #6c757d;
-        --border-color: #dee2e6;
-        --card-bg: rgba(255, 255, 255, 0.95);
-        --input-bg: #ffffff;
-        --shadow-color: rgba(0, 0, 0, 0.1);
-    }
-
-    .dark-theme {
-        --bg-primary: #151820;
-        --bg-secondary: #1c1f2e;
-        --text-primary: #ffffff;
-        --text-secondary: #adb5bd;
-        --border-color: #343a40;
-        --card-bg: rgba(21, 24, 32, 0.95);
-        --input-bg: #1c1f2e;
-        --shadow-color: rgba(0, 0, 0, 0.3);
+        --navbar-bg: #151820;
+        --body-bg: #14172C;
+        --card-bg: #1E2238;
+        --text-primary: #FFFFFF;
+        --text-secondary: #94A3B8;
+        --border-color: #2D3748;
+        --input-bg: #252A41;
     }
 
     body {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: var(--body-bg);
         min-height: 100vh;
         font-family: 'Inter', sans-serif;
-        transition: all 0.3s ease;
         margin: 0;
-        padding: 20px;
-        box-sizing: border-box;
+        padding: 0;
+        color: var(--text-primary);
     }
 
     .container {
-        max-width: 1200px;
+        max-width: 800px;
         margin: 0 auto;
+        padding: 20px;
     }
 
     .generate-card {
         background: var(--card-bg);
-        backdrop-filter: blur(20px);
-        border-radius: 24px;
-        box-shadow: 0 25px 50px var(--shadow-color);
-        border: 1px solid rgba(255, 255, 255, 0.15);
-        transition: all 0.3s ease;
+        border-radius: 20px;
+        border: 1px solid var(--border-color);
+        margin: 20px 0;
         position: relative;
         overflow: hidden;
-        margin: 20px 0;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
     }
 
     .generate-card::before {
@@ -81,35 +61,20 @@ y{{-- resources/views/users/pages/generate.blade.php --}}
         justify-content: center;
         margin: 0 auto 25px;
         box-shadow: 0 10px 30px rgba(99, 102, 241, 0.3);
-        position: relative;
-        overflow: hidden;
-    }
-
-    .form-icon::after {
-        content: '';
-        position: absolute;
-        top: -50%;
-        left: -50%;
-        width: 200%;
-        height: 200%;
-        background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
-        transform: rotate(45deg);
-        animation: shine 3s infinite;
     }
 
     .form-icon i {
         font-size: 2rem;
         color: white;
-        z-index: 2;
     }
 
     .form-control {
         background: var(--input-bg);
         border: 2px solid var(--border-color);
-        border-radius: 14px;
+        border-radius: 12px;
         padding: 16px 20px;
         font-size: 1rem;
-        color: var(--text-primary);
+        color: var(--text-primary) !important; /* Force text color */
         transition: all 0.3s ease;
         width: 100%;
         box-sizing: border-box;
@@ -117,109 +82,33 @@ y{{-- resources/views/users/pages/generate.blade.php --}}
 
     .form-control:focus {
         border-color: var(--primary);
-        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
-        background: var(--input-bg);
-        color: var(--text-primary);
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
         outline: none;
+        background: var(--input-bg);
+        color: var(--text-primary) !important;
     }
 
     .form-control::placeholder {
-        color: var(--text-secondary);
+        color: var(--text-secondary) !important; /* Force placeholder color */
+        opacity: 0.7;
     }
 
     .btn-primary {
         background: linear-gradient(135deg, var(--primary), var(--primary-dark));
         border: none;
-        border-radius: 14px;
+        border-radius: 12px;
         padding: 16px 35px;
         font-weight: 600;
         font-size: 1.1rem;
         transition: all 0.3s ease;
-        position: relative;
-        overflow: hidden;
         color: white;
         cursor: pointer;
         width: 100%;
     }
 
     .btn-primary:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 15px 30px rgba(99, 102, 241, 0.4);
-    }
-
-    .btn-primary:active {
-        transform: translateY(-1px);
-    }
-
-    .btn-primary:disabled {
-        opacity: 0.7;
-        cursor: not-allowed;
-        transform: none;
-    }
-
-    .feature-card {
-        background: var(--bg-secondary);
-        border-radius: 16px;
-        border-left: 4px solid var(--primary);
-        transition: all 0.3s ease;
-        position: relative;
-        overflow: hidden;
-        padding: 20px;
-        text-align: center;
-        height: 100%;
-    }
-
-    .feature-card::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        right: 0;
-        width: 60px;
-        height: 60px;
-        background: linear-gradient(135deg, rgba(99, 102, 241, 0.05), rgba(79, 70, 229, 0.05));
-        border-radius: 0 16px 0 60px;
-    }
-
-    .security-badge {
-        background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(52, 211, 153, 0.1));
-        border: 1px solid rgba(16, 185, 129, 0.3);
-        border-radius: 20px;
-        padding: 12px 20px;
-        backdrop-filter: blur(10px);
-        display: inline-flex;
-        align-items: center;
-        margin-top: 20px;
-    }
-
-    .alert-success {
-        background: rgba(16, 185, 129, 0.1);
-        border: 1px solid rgba(16, 185, 129, 0.3);
-        color: var(--text-primary);
-        border-radius: 16px;
-    }
-
-    @keyframes shine {
-        0% {
-            transform: rotate(45deg) translateX(-100%);
-        }
-        100% {
-            transform: rotate(45deg) translateX(100%);
-        }
-    }
-
-    @keyframes fadeInUp {
-        from {
-            opacity: 0;
-            transform: translateY(30px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-
-    .generate-card {
-        animation: fadeInUp 0.6s ease-out;
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px rgba(99, 102, 241, 0.4);
     }
 
     .loading-spinner {
@@ -233,18 +122,13 @@ y{{-- resources/views/users/pages/generate.blade.php --}}
     }
 
     @keyframes spin {
-        0% {
-            transform: rotate(0deg);
-        }
-        100% {
-            transform: rotate(360deg);
-        }
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
     }
 
     .alert {
-        border-radius: 16px;
+        border-radius: 12px;
         border: none;
-        backdrop-filter: blur(10px);
         padding: 20px;
         margin-bottom: 20px;
     }
@@ -255,7 +139,6 @@ y{{-- resources/views/users/pages/generate.blade.php --}}
         color: var(--text-primary);
     }
 
-    /* Text styling */
     .text-dark {
         color: var(--text-primary) !important;
     }
@@ -264,276 +147,127 @@ y{{-- resources/views/users/pages/generate.blade.php --}}
         color: var(--text-secondary) !important;
     }
 
+    .security-badge {
+        background: rgba(16, 185, 129, 0.1);
+        border: 1px solid rgba(16, 185, 129, 0.3);
+        border-radius: 20px;
+        padding: 12px 20px;
+        display: inline-flex;
+        align-items: center;
+    }
+
     .form-label {
-        display: block;
-        margin-bottom: 8px;
+        color: var(--text-primary) !important;
         font-weight: 600;
     }
 
     .form-text {
-        display: block;
-        margin-top: 8px;
-        font-size: 0.875rem;
+        color: var(--text-secondary) !important;
     }
 
-    /* Grid system fixes */
-    .row {
-        display: flex;
-        flex-wrap: wrap;
-        margin: 0 -10px;
-    }
-
-    .col-md-4, .col-md-8, .col-lg-6 {
-        padding: 0 10px;
-        box-sizing: border-box;
-    }
-
-    .col-md-4 {
-        flex: 0 0 33.333333%;
-        max-width: 33.333333%;
-    }
-
-    .col-md-8 {
-        flex: 0 0 66.666667%;
-        max-width: 66.666667%;
-    }
-
-    .col-lg-6 {
-        flex: 0 0 50%;
-        max-width: 50%;
-    }
-
-    /* Responsive design */
+    /* Responsive Design */
     @media (max-width: 768px) {
-        .col-md-4 {
-            flex: 0 0 100%;
-            max-width: 100%;
-            margin-bottom: 15px;
+        .container {
+            padding: 15px;
         }
         
         .generate-card {
-            padding: 30px 20px !important;
             margin: 10px 0;
+            border-radius: 16px;
         }
         
-        body {
-            padding: 10px;
+        .form-icon {
+            width: 60px;
+            height: 60px;
+        }
+        
+        .form-icon i {
+            font-size: 1.5rem;
+        }
+        
+        .btn-primary {
+            padding: 14px 25px;
+            font-size: 1rem;
         }
     }
 
-    .min-vh-100 {
-        min-height: 100vh;
-    }
-
-    .py-5 {
-        padding-top: 3rem !important;
-        padding-bottom: 3rem !important;
-    }
-
-    .mb-4 {
-        margin-bottom: 1.5rem !important;
-    }
-
-    .mb-5 {
-        margin-bottom: 3rem !important;
-    }
-
-    .mt-5 {
-        margin-top: 3rem !important;
-    }
-
-    .mb-3 {
-        margin-bottom: 1rem !important;
-    }
-
-    .mb-2 {
-        margin-bottom: 0.5rem !important;
-    }
-
-    .ms-2 {
-        margin-left: 0.5rem !important;
-    }
-
-    .me-2 {
-        margin-right: 0.5rem !important;
-    }
-
-    .me-3 {
-        margin-right: 1rem !important;
-    }
-
-    .me-1 {
-        margin-right: 0.25rem !important;
-    }
-
-    .g-3 {
-        gap: 1rem !important;
-    }
-
-    .text-center {
-        text-align: center !important;
-    }
-
-    .fw-bold {
-        font-weight: 700 !important;
-    }
-
-    .fw-semibold {
-        font-weight: 600 !important;
-    }
-
-    .d-flex {
-        display: flex !important;
-    }
-
-    .d-grid {
-        display: grid !important;
-    }
-
-    .align-items-center {
-        align-items: center !important;
-    }
-
-    .d-inline-flex {
-        display: inline-flex !important;
-    }
-
-    .justify-content-center {
-        justify-content: center !important;
-    }
-
-    .fa-lg {
-        font-size: 1.33333em !important;
-    }
-
-    .small {
-        font-size: 0.875rem !important;
-    }
-
-    .alert-heading {
-        font-weight: 600;
-        margin-bottom: 0.5rem;
+    @media (max-width: 480px) {
+        .container {
+            padding: 10px;
+        }
+        
+        .generate-card {
+            margin: 5px 0;
+        }
+        
+        .form-control {
+            padding: 14px 16px;
+            font-size: 0.9rem;
+        }
     }
 </style>
 
 <div class="container">
-    <div class="row justify-content-center align-items-center min-vh-100 py-5">
-        <div class="col-md-8 col-lg-6">
-            <div class="generate-card p-5">
-                <!-- Header -->
-                <div class="text-center mb-5">
-                    <div class="form-icon">
-                        <i class="fas fa-link"></i>
-                    </div>
-                    <h2 class="fw-bold text-dark mb-3" style="font-size: 2rem;">Generate Download Link</h2>
-                    <p class="text-muted" style="font-size: 1.1rem;">Paste your download link below to create a secure download</p>
-                </div>
+    <div class="generate-card p-4 p-md-5">
+        <!-- Header -->
+        <div class="text-center mb-4 mb-md-5">
+            <div class="form-icon">
+                <i class="fas fa-link"></i>
+            </div>
+            <h2 class="fw-bold text-dark mb-3">Generate Download Links</h2>
+            <p class="text-muted">Paste single or multiple links to create secure downloads</p>
+        </div>
 
-                <!-- Success Message -->
-                @if (session('success'))
-                <div class="alert alert-success mb-4">
-                    <div class="d-flex align-items-center">
-                        <i class="fas fa-check-circle me-3 fa-lg text-success"></i>
-                        <div>
-                            <h6 class="alert-heading mb-2 text-success">Success!</h6>
-                            <p class="mb-0">{{ session('success') }}</p>
-                        </div>
-                    </div>
-                </div>
-                @endif
-
-                <!-- Bulk Download Links -->
-                @if (session('bulk_slugs'))
-                <div class="download-links-container">
-                    <h6 class="fw-bold text-dark mb-3">
-                        <i class="fas fa-download me-2 text-primary"></i>
-                        Your Download Links:
-                    </h6>
-                    <div class="d-grid gap-2">
-                        @foreach (session('bulk_slugs') as $index => $slug)
-                        <a href="{{ route('file.download', $slug) }}" target="_blank" class="btn btn-outline-primary btn-sm text-start">
-                            <i class="fas fa-external-link-alt me-2"></i>
-                            Download File {{ $index + 1 }}
-                        </a>
+        <!-- Error Messages -->
+        @if ($errors->any())
+            <div class="alert alert-danger">
+                <div class="d-flex align-items-center">
+                    <i class="fas fa-exclamation-triangle me-3 fa-lg text-danger"></i>
+                    <div>
+                        <h6 class="alert-heading mb-2 text-danger">Error!</h6>
+                        @foreach ($errors->all() as $error)
+                            <p class="mb-1">{{ $error }}</p>
                         @endforeach
                     </div>
                 </div>
-                @endif
+            </div>
+        @endif
 
-                <!-- Single Link Form -->
-                <form method="POST" action="{{ route('file.generate') }}" id="generateForm">
-                    @csrf
-                    <div class="mb-4">
-                        <label for="linkInput" class="form-label text-dark fw-semibold mb-3">Download Link</label>
-                        <input 
-                            type="url" 
-                            class="form-control form-control-lg" 
-                            id="linkInput"
-                            name="link" 
-                            placeholder="https://example.com/file..." 
-                            required
-                            value="{{ old('link') }}"
-                        >
-                        <div class="form-text text-muted mt-2">
-                            <i class="fas fa-info-circle me-1"></i>
-                            Paste your download link
-                        </div>
-                    </div>
-
-                    <div class="d-grid">
-                        <button type="submit" class="btn btn-primary btn-lg" id="generateBtn">
-                            <span id="btnText">Generate Secure Link</span>
-                            <div class="loading-spinner ms-2" id="btnSpinner"></div>
-                        </button>
-                    </div>
-                </form>
-
-                <!-- Divider -->
-                <div class="my-4 text-center">
-                    <span class="text-muted">OR</span>
+        <!-- Single Form for Both -->
+        <form method="POST" action="{{ route('file.generate-links') }}" id="linksForm">
+            @csrf
+            <div class="mb-4">
+                <label for="linksInput" class="form-label text-dark fw-semibold mb-3">
+                    <i class="fas fa-link me-2"></i>
+                    Download Links
+                </label>
+                <textarea 
+                    class="form-control" 
+                    id="linksInput" 
+                    name="links" 
+                    rows="6" 
+                    placeholder="Paste single or multiple links (one per line)&#10;Example:&#10;https://example.com/file1.zip&#10;https://example.com/file2.zip"
+                    required
+                >{{ old('links') }}</textarea>
+                <div class="form-text text-muted mt-2">
+                    <i class="fas fa-info-circle me-1"></i>
+                    Paste one link or multiple links (max 20), each on a new line
                 </div>
+            </div>
 
-                <!-- Bulk Links Section -->
-                <div class="mt-4">
-                    <div class="feature-card">
-                        <h5 class="fw-bold text-dark mb-3">
-                            <i class="fas fa-layer-group me-2 text-primary"></i>
-                            Bulk Links Processing
-                        </h5>
-                        <form method="POST" action="{{ route('file.generate-bulk') }}" id="bulkForm">
-                            @csrf
-                            <div class="mb-3">
-                                <label for="bulkLinks" class="form-label text-dark fw-semibold">Multiple Links (One per line)</label>
-                                <textarea 
-                                    class="form-control" 
-                                    id="bulkLinks"
-                                    name="bulk_links" 
-                                    rows="6" 
-                                    placeholder="Paste multiple links, one per line...&#10;Example:&#10;https://example.com/file1&#10;https://example.com/file2"
-                                >{{ old('bulk_links') }}</textarea>
-                                <div class="form-text text-muted mt-2">
-                                    <i class="fas fa-info-circle me-1"></i>
-                                    Paste multiple links (max 20), each on a new line
-                                </div>
-                            </div>
+            <div class="d-grid">
+                <button type="submit" class="btn btn-primary btn-lg" id="generateBtn">
+                    <span id="btnText">Generate Download Links</span>
+                    <div class="loading-spinner ms-2" id="btnSpinner"></div>
+                </button>
+            </div>
+        </form>
 
-                            <div class="d-grid">
-                                <button type="submit" class="btn btn-primary" id="bulkBtn">
-                                    <span id="bulkBtnText">Process Multiple Links</span>
-                                    <div class="loading-spinner ms-2" id="bulkBtnSpinner"></div>
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-
-                <!-- Security Info -->
-                <div class="mt-5 text-center">
-                    <div class="security-badge d-inline-flex align-items-center px-3 py-2">
-                        <i class="fas fa-lock me-2 text-success"></i>
-                        <span class="small fw-medium">Secure Connection • Protected by Captcha • Safe to Use</span>
-                    </div>
-                </div>
+        <!-- Security Info -->
+        <div class="mt-4 mt-md-5 text-center">
+            <div class="security-badge d-inline-flex align-items-center px-3 py-2">
+                <i class="fas fa-lock me-2 text-success"></i>
+                <span class="small fw-medium">Secure Connection • Protected by Captcha • Safe to Use</span>
             </div>
         </div>
     </div>
@@ -541,33 +275,19 @@ y{{-- resources/views/users/pages/generate.blade.php --}}
 
 <!-- Font Awesome -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        const generateForm = document.getElementById('generateForm');
+        const linksForm = document.getElementById('linksForm');
         const generateBtn = document.getElementById('generateBtn');
         const btnText = document.getElementById('btnText');
         const btnSpinner = document.getElementById('btnSpinner');
 
-        const bulkForm = document.getElementById('bulkForm');
-        const bulkBtn = document.getElementById('bulkBtn');
-        const bulkBtnText = document.getElementById('bulkBtnText');
-        const bulkBtnSpinner = document.getElementById('bulkBtnSpinner');
-
-        if (generateForm) {
-            generateForm.addEventListener('submit', function() {
+        if (linksForm) {
+            linksForm.addEventListener('submit', function() {
                 generateBtn.disabled = true;
-                btnText.textContent = 'Generating...';
+                btnText.textContent = 'Processing Links...';
                 btnSpinner.style.display = 'inline-block';
-            });
-        }
-
-        if (bulkForm) {
-            bulkForm.addEventListener('submit', function() {
-                bulkBtn.disabled = true;
-                bulkBtnText.textContent = 'Processing...';
-                bulkBtnSpinner.style.display = 'inline-block';
             });
         }
     });

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Http;
 use App\Models\TemporaryFile;
 
 class FileController extends Controller
@@ -15,69 +16,66 @@ class FileController extends Controller
         return view('users.pages.generate');
     }
 
-    // Handle single link submission
-    public function generate(Request $request)
+    // Handle both single and multiple links
+    public function generateLinks(Request $request)
     {
         $request->validate([
-            'link' => 'required|url'
+            'links' => 'required|string'
         ]);
 
-        $fileLink = $request->link;
-        
-        // Process single link (NO API CALL)
-        $result = $this->processSingleLink($fileLink);
-        
-        if (!$result['success']) {
-            return back()->withErrors(['link' => $result['message']]);
-        }
-
-        return redirect()->route('file.download', ['slug' => $result['slug']]);
-    }
-
-    // Handle bulk links submission
-    public function generateBulk(Request $request)
-    {
-        $request->validate([
-            'bulk_links' => 'required|string'
-        ]);
-
-        $linksText = $request->bulk_links;
+        $linksText = $request->links;
         $links = $this->extractLinksFromText($linksText);
         
         if (empty($links)) {
-            return back()->withErrors(['bulk_links' => 'No valid links found.']);
+            return back()->withErrors(['links' => 'No valid links found.']);
         }
 
-        // Limit to 20 links per batch for performance
+        // Limit to 20 links for performance
         $links = array_slice($links, 0, 20);
 
-        $successfulSlugs = [];
-        $failedLinks = [];
+        $processedLinks = [];
+        $batchId = Str::random(12);
 
-        foreach ($links as $link) {
-            $result = $this->processSingleLink($link);
+        foreach ($links as $index => $link) {
+            $result = $this->processSingleLink($link, $batchId, $index);
             
             if ($result['success']) {
-                $successfulSlugs[] = $result['slug'];
-            } else {
-                $failedLinks[] = [
-                    'url' => $link,
-                    'error' => $result['message']
+                $processedLinks[] = [
+                    'slug' => $result['slug'],
+                    'original_url' => $link,
+                    'metadata' => $result['metadata']
                 ];
             }
         }
 
-        // Store successful slugs in session for JavaScript to open tabs
-        if (!empty($successfulSlugs)) {
-            session()->flash('bulk_slugs', $successfulSlugs);
+        if (empty($processedLinks)) {
+            return back()->withErrors(['links' => 'No valid links could be processed.']);
         }
 
-        if (!empty($failedLinks)) {
-            session()->flash('bulk_failed_links', $failedLinks);
+        // Store batch in session and redirect to display page
+        session()->flash('processed_links', [
+            'batch_id' => $batchId,
+            'links' => $processedLinks,
+            'total_files' => count($processedLinks)
+        ]);
+
+        return redirect()->route('file.links-display');
+    }
+
+    // Display all links in grid view
+    public function linksDisplay()
+    {
+        $linksData = session('processed_links');
+        
+        if (!$linksData) {
+            return redirect()->route('file.form')->withErrors(['error' => 'No links data found.']);
         }
 
-        // Redirect back to form with success message
-        return redirect()->route('file.form')->with('success', count($successfulSlugs) . ' links processed successfully!');
+        return view('users.pages.links-display', [
+            'batch_id' => $linksData['batch_id'],
+            'links' => $linksData['links'],
+            'total_files' => $linksData['total_files']
+        ]);
     }
 
     // Extract links from text
@@ -89,28 +87,35 @@ class FileController extends Controller
         return array_unique($matches[0] ?? []);
     }
 
-    // Process single link - NO API CALL
-    private function processSingleLink($fileLink, $batchId = null)
+    // Process single link with metadata
+    private function processSingleLink($fileLink, $batchId = null, $index = 0)
     {
         try {
             $slug = Str::random(12);
 
-            // Store in database - store the original link directly
+            // Get metadata for the URL
+            $metadata = $this->fetchUrlMetadata($fileLink);
+
+            // Store in database
             TemporaryFile::create([
                 'slug' => $slug,
-                'download_url' => $fileLink, // Store original link
+                'download_url' => $fileLink,
                 'original_url' => $fileLink,
                 'expires_at' => now()->addHours(72),
-                'batch_id' => $batchId
+                'batch_id' => $batchId,
+                'file_order' => $index,
+                'metadata' => json_encode($metadata)
             ]);
 
             return [
                 'success' => true,
                 'slug' => $slug,
+                'metadata' => $metadata,
                 'message' => 'Link processed successfully.'
             ];
 
         } catch (\Exception $e) {
+            \Log::error('Link processing error: ' . $e->getMessage());
             return [
                 'success' => false,
                 'message' => 'Service temporarily unavailable.'
@@ -118,24 +123,67 @@ class FileController extends Controller
         }
     }
 
-    // Single download page
-    public function download($slug)
+    // Fetch URL metadata
+    private function fetchUrlMetadata($url)
     {
-        $file = TemporaryFile::where('slug', $slug)
-                            ->where('expires_at', '>', now())
-                            ->first();
-
-        if (!$file) {
-            return redirect()->route('file.form')->withErrors(['link' => 'Download link expired or invalid.']);
+        try {
+            $host = parse_url($url, PHP_URL_HOST);
+            $siteName = $this->getSiteNameFromHost($host);
+            
+            return [
+                'host' => $host,
+                'site_name' => $siteName,
+                'favicon' => $this->getFaviconUrl($host),
+                'title' => $this->getUrlTitle($url)
+            ];
+        } catch (\Exception $e) {
+            return [
+                'host' => parse_url($url, PHP_URL_HOST) ?? 'unknown',
+                'site_name' => 'Download Host',
+                'favicon' => $this->getDefaultFavicon(),
+                'title' => 'Download File'
+            ];
         }
-
-        return view('users.pages.single', [
-            'slug' => $slug, 
-            'file' => $file
-        ]);
     }
 
-    // Verify hCaptcha and redirect to original link
+    private function getSiteNameFromHost($host)
+    {
+        if (!$host) return 'Unknown';
+        
+        $host = str_replace('www.', '', $host);
+        $parts = explode('.', $host);
+        
+        if (count($parts) >= 2) {
+            return ucfirst($parts[0]);
+        }
+        
+        return ucfirst($host);
+    }
+
+    private function getFaviconUrl($host)
+    {
+        if (!$host) return $this->getDefaultFavicon();
+        return "https://www.google.com/s2/favicons?domain={$host}&sz=32";
+    }
+
+    private function getDefaultFavicon()
+    {
+        return "https://www.google.com/s2/favicons?domain=example.com&sz=32";
+    }
+
+    private function getUrlTitle($url)
+    {
+        $path = parse_url($url, PHP_URL_PATH);
+        $filename = basename($path);
+        
+        if ($filename && $filename !== '/') {
+            return $filename;
+        }
+        
+        return 'Download File';
+    }
+
+    // Verify hCaptcha and return original link
     public function verifyAndDownload(Request $request)
     {
         $request->validate([
@@ -143,16 +191,16 @@ class FileController extends Controller
             'slug' => 'required|string'
         ]);
 
-        // For development, bypass hCaptcha
-        if (app()->environment('local')) {
-            \Log::info('hCaptcha bypassed in local development');
+        // For development, bypass hCaptcha if no secret key
+        $secret = env('HCAPTCHA_SECRET_KEY');
+        if (!$secret || app()->environment('local')) {
+            \Log::info('hCaptcha bypassed');
         } else {
-            // Verify hCaptcha in production
             if (!$this->verifyHCaptcha($request->input('h-captcha-response'))) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Captcha verification failed. Please try again.'
-                ]);
+                ], 422);
             }
         }
 
@@ -165,10 +213,10 @@ class FileController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Download link expired or invalid.'
-            ]);
+            ], 404);
         }
 
-        // Return the original link for redirection
+        // Return the original link
         return response()->json([
             'success' => true,
             'download_url' => $file->download_url
@@ -180,7 +228,7 @@ class FileController extends Controller
         $secret = env('HCAPTCHA_SECRET_KEY');
         
         if (!$secret) {
-            return app()->environment('local') ? true : false;
+            return true;
         }
 
         try {
@@ -193,6 +241,7 @@ class FileController extends Controller
             
             return isset($data['success']) && $data['success'] === true;
         } catch (\Exception $e) {
+            \Log::error('hCaptcha verification error: ' . $e->getMessage());
             return false;
         }
     }
