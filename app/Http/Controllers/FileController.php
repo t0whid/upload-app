@@ -52,29 +52,44 @@ class FileController extends Controller
             return back()->withErrors(['links' => 'No valid links could be processed.']);
         }
 
-        // Store batch in session and redirect to display page
-        session()->flash('processed_links', [
-            'batch_id' => $batchId,
-            'links' => $processedLinks,
-            'total_files' => count($processedLinks)
-        ]);
-
-        return redirect()->route('file.links-display');
+        // Redirect to shareable link
+        return redirect()->route('file.links-display', ['batch_id' => $batchId]);
     }
 
-    // Display all links in grid view
-    public function linksDisplay()
+    // Display all links in grid view - SHAREABLE VERSION
+    public function linksDisplay($batch_id = null)
     {
-        $linksData = session('processed_links');
+        // If batch_id is provided via URL, use it
+        $batchId = $batch_id ?? (session('processed_links')['batch_id'] ?? null);
         
-        if (!$linksData) {
-            return redirect()->route('file.form')->withErrors(['error' => 'No links data found.']);
+        if (!$batchId) {
+            return redirect()->route('file.form')->withErrors(['error' => 'No batch ID found.']);
+        }
+
+        // Get files from database using batch_id
+        $files = TemporaryFile::where('batch_id', $batchId)
+                            ->where('expires_at', '>', now())
+                            ->orderBy('file_order')
+                            ->get();
+
+        if ($files->isEmpty()) {
+            return redirect()->route('file.form')->withErrors(['error' => 'Download links expired or invalid.']);
+        }
+
+        $processedLinks = [];
+        foreach ($files as $file) {
+            $processedLinks[] = [
+                'slug' => $file->slug,
+                'original_url' => $file->original_url,
+                'metadata' => json_decode($file->metadata, true)
+            ];
         }
 
         return view('users.pages.links-display', [
-            'batch_id' => $linksData['batch_id'],
-            'links' => $linksData['links'],
-            'total_files' => $linksData['total_files']
+            'batch_id' => $batchId,
+            'links' => $processedLinks,
+            'total_files' => count($processedLinks),
+            'shareable_url' => route('file.links-display', ['batch_id' => $batchId]) // Shareable URL
         ]);
     }
 
@@ -220,6 +235,56 @@ class FileController extends Controller
         return response()->json([
             'success' => true,
             'download_url' => $file->download_url
+        ]);
+    }
+
+    // Verify hCaptcha and unlock ALL links in batch
+    public function verifyAndDownloadAll(Request $request)
+    {
+        $request->validate([
+            'h-captcha-response' => 'required|string',
+            'batch_id' => 'required|string'
+        ]);
+
+        // For development, bypass hCaptcha if no secret key
+        $secret = env('HCAPTCHA_SECRET_KEY');
+        if (!$secret || app()->environment('local')) {
+            \Log::info('hCaptcha bypassed for batch download');
+        } else {
+            // Verify hCaptcha in production
+            if (!$this->verifyHCaptcha($request->input('h-captcha-response'))) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Captcha verification failed. Please try again.'
+                ], 422);
+            }
+        }
+
+        $batchId = $request->batch_id;
+        $files = TemporaryFile::where('batch_id', $batchId)
+                          ->where('expires_at', '>', now())
+                          ->get();
+
+        if ($files->isEmpty()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Download links expired or invalid.'
+            ], 404);
+        }
+
+        // Return all download links
+        $downloadLinks = [];
+        foreach ($files as $file) {
+            $downloadLinks[] = [
+                'slug' => $file->slug,
+                'download_url' => $file->download_url
+            ];
+        }
+
+        return response()->json([
+            'success' => true,
+            'download_links' => $downloadLinks,
+            'message' => 'All links unlocked successfully!'
         ]);
     }
 

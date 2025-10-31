@@ -11,15 +11,21 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('temporary_files', function (Blueprint $table) {
+         Schema::create('temporary_files', function (Blueprint $table) {
             $table->id();
             $table->string('slug')->unique();
             $table->text('download_url');
             $table->text('original_url');
+            $table->string('batch_id')->nullable()->index();
+            $table->integer('file_order')->default(0);
+            $table->json('metadata')->nullable();
             $table->timestamp('expires_at');
-             $table->string('batch_id')->nullable();
             $table->timestamps();
+
+            // Indexes for better performance
             $table->index(['batch_id', 'expires_at']);
+            $table->index(['slug', 'expires_at']);
+            $table->index('expires_at');
         });
     }
 

@@ -13,11 +13,15 @@ class TemporaryFile extends Model
         'slug',
         'download_url',
         'original_url',
+        'batch_id',
+        'file_order',
+        'metadata',
         'expires_at',
-        'batch_id'
     ];
 
+    
     protected $casts = [
-        'expires_at' => 'datetime'
+        'metadata' => 'array',
+        'expires_at' => 'datetime',
     ];
 }

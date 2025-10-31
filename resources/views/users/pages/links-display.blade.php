@@ -51,13 +51,128 @@
         background: linear-gradient(135deg, var(--primary), var(--primary-dark));
     }
 
+    /* Share Section */
+    .share-section {
+        background: var(--input-bg);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        padding: 20px;
+        margin: 0 30px 25px;
+    }
+
+    .share-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 15px;
+    }
+
+    .share-title {
+        color: var(--text-primary);
+        font-weight: 600;
+        font-size: 1.1rem;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .share-url-container {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+    }
+
+    .share-url-input {
+        flex: 1;
+        background: var(--card-bg);
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        padding: 10px 15px;
+        color: var(--text-primary);
+        font-size: 0.9rem;
+        font-family: 'Courier New', monospace;
+    }
+
+    .btn-copy-url {
+        background: var(--primary);
+        border: none;
+        border-radius: 8px;
+        padding: 10px 15px;
+        color: white;
+        font-weight: 500;
+        font-size: 0.85rem;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        transition: all 0.3s ease;
+    }
+
+    .btn-copy-url:hover {
+        background: var(--primary-dark);
+        transform: translateY(-1px);
+    }
+
+    .btn-copy-url.copied {
+        background: var(--success);
+    }
+
+    /* Bulk Action Section */
+    .bulk-action-section {
+        background: var(--input-bg);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        padding: 25px;
+        margin: 0 30px 25px;
+        text-align: center;
+    }
+
+    .bulk-action-title {
+        color: var(--text-primary);
+        font-weight: 600;
+        margin-bottom: 15px;
+        font-size: 1.1rem;
+    }
+
+    .bulk-action-desc {
+        color: var(--text-secondary);
+        margin-bottom: 20px;
+        font-size: 0.9rem;
+    }
+
+    .btn-unlock-all {
+        background: linear-gradient(135deg, #f59e0b, #d97706);
+        border: none;
+        border-radius: 10px;
+        padding: 14px 30px;
+        color: white;
+        font-weight: 600;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .btn-unlock-all:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(245, 158, 11, 0.4);
+    }
+
+    .btn-unlock-all:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none;
+    }
+
     /* Grid Layout - Wider Cards and Centered */
     .files-grid {
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
         gap: 25px;
-        padding: 30px;
-        justify-items: center; /* Center grid items */
+        padding: 0 30px 30px;
+        justify-items: center;
     }
 
     .file-card {
@@ -68,7 +183,7 @@
         overflow: hidden;
         box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
         width: 100%;
-        max-width: 380px; /* Ensure consistent width */
+        max-width: 380px;
     }
 
     .file-card:hover {
@@ -140,7 +255,7 @@
     }
 
     .link-text {
-        color: var(--text-primary) !important; /* Force text color */
+        color: var(--text-primary) !important;
         font-size: 0.85rem;
         word-break: break-all;
         font-family: 'Courier New', monospace;
@@ -314,29 +429,30 @@
     }
 
     /* Responsive Design */
-    @media (max-width: 1200px) {
-        .files-grid {
-            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-            gap: 20px;
-            padding: 25px;
-        }
-    }
-
-    @media (max-width: 992px) {
-        .files-grid {
-            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-        }
-    }
-
     @media (max-width: 768px) {
         .container {
             padding: 15px;
         }
         
+        .share-section, .bulk-action-section {
+            margin: 0 20px 20px;
+            padding: 20px;
+        }
+        
+        .share-header {
+            flex-direction: column;
+            gap: 15px;
+            align-items: flex-start;
+        }
+        
+        .share-url-container {
+            width: 100%;
+        }
+        
         .files-grid {
             grid-template-columns: 1fr;
             gap: 15px;
-            padding: 20px;
+            padding: 0 20px 20px;
         }
         
         .downloads-card {
@@ -346,10 +462,8 @@
         
         .file-card {
             max-width: 100%;
-            margin-bottom: 0;
         }
 
-        /* Mobile Modal */
         .captcha-modal .modal-dialog {
             margin: 10px;
             max-width: calc(100% - 20px);
@@ -365,8 +479,13 @@
             padding: 10px;
         }
         
-        .files-grid {
+        .share-section, .bulk-action-section {
+            margin: 0 15px 15px;
             padding: 15px;
+        }
+        
+        .files-grid {
+            padding: 0 15px 15px;
             gap: 12px;
         }
         
@@ -392,18 +511,6 @@
             padding: 20px;
         }
     }
-
-    /* Small Mobile */
-    @media (max-width: 360px) {
-        .files-grid {
-            grid-template-columns: 1fr;
-            padding: 10px;
-        }
-        
-        .file-card {
-            margin: 0 5px;
-        }
-    }
 </style>
 
 <div class="container">
@@ -420,8 +527,48 @@
                 </span>
             </div>
             <p class="text-muted mb-0">
-                Click "UNLOCK" to verify and get download links. Copy links to share.
+                Unlock individual links or use "UNLOCK ALL" to get all links with one captcha.
             </p>
+        </div>
+
+        <!-- Share Section -->
+        <div class="share-section">
+            <div class="share-header">
+                <div class="share-title">
+                    <i class="fas fa-share-alt text-primary"></i>
+                    Shareable Link
+                </div>
+            </div>
+            <div class="share-url-container">
+                <input type="text" class="share-url-input" id="shareUrlInput" 
+                       value="{{ $shareable_url ?? url()->current() }}" readonly>
+                <button class="btn-copy-url" onclick="copyShareUrl()" id="copyUrlBtn">
+                    <i class="fas fa-copy me-1"></i>
+                    <span id="copyUrlText">COPY</span>
+                </button>
+            </div>
+            <div class="mt-2">
+                <small class="text-muted">
+                    <i class="fas fa-info-circle me-1"></i>
+                    Share this link with others. Links expire in 72 hours.
+                </small>
+            </div>
+        </div>
+
+        <!-- Bulk Action Section -->
+        <div class="bulk-action-section">
+            <h4 class="bulk-action-title">
+                <i class="fas fa-bolt me-2 text-warning"></i>
+                Unlock All Links
+            </h4>
+            <p class="bulk-action-desc">
+                Complete one captcha to unlock all {{ $total_files }} download links at once
+            </p>
+            <button class="btn-unlock-all" onclick="openBulkCaptchaModal()" id="bulkUnlockBtn">
+                <i class="fas fa-unlock-alt me-1"></i>
+                <span id="bulkBtnText">UNLOCK ALL LINKS</span>
+                <div class="loading-spinner ms-1" id="bulkBtnSpinner" style="display: none;"></div>
+            </button>
         </div>
 
         <!-- Files Grid -->
@@ -489,7 +636,7 @@
     </div>
 </div>
 
-<!-- Captcha Modal - Fixed and Responsive -->
+<!-- Individual Captcha Modal -->
 <div class="modal fade captcha-modal" id="captchaModal" tabindex="-1" aria-labelledby="captchaModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
@@ -509,6 +656,33 @@
                     <button class="btn-unlock w-100" onclick="verifyAndDownload()" id="modalVerifyBtn">
                         <i class="fas fa-check me-1"></i>
                         VERIFY & UNLOCK
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Bulk Captcha Modal -->
+<div class="modal fade captcha-modal" id="bulkCaptchaModal" tabindex="-1" aria-labelledby="bulkCaptchaModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold" id="bulkCaptchaModalLabel">
+                    <i class="fas fa-robot me-2 text-warning"></i>
+                    Unlock All Links
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="captcha-section">
+                    <p class="mb-4">Complete one captcha to unlock all {{ $total_files }} download links</p>
+                    
+                    <div class="h-captcha mb-4" data-sitekey="<?php echo env('HCAPTCHA_SITE_KEY', 'your-site-key'); ?>" id="bulkModalCaptcha"></div>
+                    
+                    <button class="btn-unlock-all w-100" onclick="verifyAndDownloadAll()" id="bulkModalVerifyBtn">
+                        <i class="fas fa-check me-1"></i>
+                        UNLOCK ALL LINKS
                     </button>
                 </div>
             </div>
@@ -538,7 +712,36 @@
 <script>
     let currentSlug = null;
     const captchaModal = new bootstrap.Modal(document.getElementById('captchaModal'));
+    const bulkCaptchaModal = new bootstrap.Modal(document.getElementById('bulkCaptchaModal'));
     const successToast = new bootstrap.Toast(document.getElementById('successToast'));
+
+    function copyShareUrl() {
+        const shareUrlInput = document.getElementById('shareUrlInput');
+        const copyUrlBtn = document.getElementById('copyUrlBtn');
+        const copyUrlText = document.getElementById('copyUrlText');
+        
+        shareUrlInput.select();
+        shareUrlInput.setSelectionRange(0, 99999);
+        
+        navigator.clipboard.writeText(shareUrlInput.value).then(() => {
+            // Show copied state
+            copyUrlBtn.classList.add('copied');
+            copyUrlBtn.innerHTML = '<i class="fas fa-check me-1"></i><span>COPIED!</span>';
+            
+            // Show success toast
+            document.getElementById('toastMessage').textContent = 'Shareable link copied to clipboard!';
+            successToast.show();
+            
+            // Reset after 2 seconds
+            setTimeout(() => {
+                copyUrlBtn.classList.remove('copied');
+                copyUrlBtn.innerHTML = '<i class="fas fa-copy me-1"></i><span>COPY</span>';
+            }, 2000);
+            
+        }).catch(() => {
+            alert('Failed to copy link');
+        });
+    }
 
     function openCaptchaModal(slug) {
         currentSlug = slug;
@@ -548,6 +751,17 @@
         setTimeout(() => {
             if (typeof hcaptcha !== 'undefined') {
                 hcaptcha.reset(document.querySelector('#modalCaptcha'));
+            }
+        }, 500);
+    }
+
+    function openBulkCaptchaModal() {
+        bulkCaptchaModal.show();
+        
+        // Reset hCaptcha when modal opens
+        setTimeout(() => {
+            if (typeof hcaptcha !== 'undefined') {
+                hcaptcha.reset(document.querySelector('#bulkModalCaptcha'));
             }
         }, 500);
     }
@@ -620,6 +834,89 @@
         }
     }
 
+    async function verifyAndDownloadAll() {
+        const hcaptchaResponse = document.querySelector('#bulkModalCaptcha [name="h-captcha-response"]');
+        const bulkModalVerifyBtn = document.getElementById('bulkModalVerifyBtn');
+        const bulkUnlockBtn = document.getElementById('bulkUnlockBtn');
+        const bulkBtnText = document.getElementById('bulkBtnText');
+        const bulkBtnSpinner = document.getElementById('bulkBtnSpinner');
+
+        if (!hcaptchaResponse || !hcaptchaResponse.value) {
+            alert('Please complete the captcha verification first.');
+            return;
+        }
+
+        // Show loading state
+        bulkModalVerifyBtn.disabled = true;
+        bulkModalVerifyBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> UNLOCKING ALL...';
+        
+        bulkUnlockBtn.disabled = true;
+        bulkBtnText.textContent = 'UNLOCKING ALL...';
+        bulkBtnSpinner.style.display = 'inline-block';
+
+        try {
+            const response = await fetch('{{ route('file.verify-download-all') }}', {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({
+                    'h-captcha-response': hcaptchaResponse.value,
+                    batch_id: '{{ $batch_id }}'
+                })
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                // Unlock all links in the UI
+                data.download_links.forEach(linkData => {
+                    const unlockBtn = document.getElementById(`btn-${linkData.slug}`);
+                    const copyBtn = document.getElementById(`copy-btn-${linkData.slug}`);
+                    const linkDisplay = document.getElementById(`link-display-${linkData.slug}`);
+                    const linkText = document.getElementById(`link-text-${linkData.slug}`);
+
+                    if (unlockBtn) {
+                        unlockBtn.innerHTML = '<i class="fas fa-check me-1"></i><span>UNLOCKED</span>';
+                        unlockBtn.classList.add('btn-unlocked');
+                        unlockBtn.disabled = true;
+                    }
+                    
+                    if (linkText && linkDisplay) {
+                        linkText.textContent = linkData.download_url;
+                        linkDisplay.style.display = 'block';
+                    }
+                    
+                    if (copyBtn) {
+                        copyBtn.style.display = 'flex';
+                    }
+                });
+
+                // Close modal
+                bulkCaptchaModal.hide();
+                
+                // Update bulk button
+                bulkUnlockBtn.innerHTML = '<i class="fas fa-check me-1"></i><span>ALL UNLOCKED</span>';
+                bulkUnlockBtn.style.background = 'linear-gradient(135deg, #10b981, #059669)';
+                bulkUnlockBtn.disabled = true;
+                
+                // Show success toast
+                document.getElementById('toastMessage').textContent = 'All links unlocked successfully!';
+                successToast.show();
+                
+            } else {
+                alert(data.message || 'Verification failed. Please try again.');
+                resetBulkButtons();
+            }
+        } catch (error) {
+            console.error('Bulk verification error:', error);
+            alert('Network error. Please try again.');
+            resetBulkButtons();
+        }
+    }
+
     function resetButtons() {
         const modalVerifyBtn = document.getElementById('modalVerifyBtn');
         const unlockBtn = document.getElementById(`btn-${currentSlug}`);
@@ -643,6 +940,32 @@
         
         if (spinner) {
             spinner.style.display = 'none';
+        }
+    }
+
+    function resetBulkButtons() {
+        const bulkModalVerifyBtn = document.getElementById('bulkModalVerifyBtn');
+        const bulkUnlockBtn = document.getElementById('bulkUnlockBtn');
+        const bulkBtnText = document.getElementById('bulkBtnText');
+        const bulkBtnSpinner = document.getElementById('bulkBtnSpinner');
+        
+        if (bulkModalVerifyBtn) {
+            bulkModalVerifyBtn.disabled = false;
+            bulkModalVerifyBtn.innerHTML = '<i class="fas fa-check me-1"></i> UNLOCK ALL LINKS';
+        }
+        
+        if (bulkUnlockBtn) {
+            bulkUnlockBtn.disabled = false;
+            bulkUnlockBtn.innerHTML = '<i class="fas fa-unlock-alt me-1"></i><span>UNLOCK ALL LINKS</span>';
+            bulkUnlockBtn.style.background = 'linear-gradient(135deg, #f59e0b, #d97706)';
+        }
+        
+        if (bulkBtnText) {
+            bulkBtnText.textContent = 'UNLOCK ALL LINKS';
+        }
+        
+        if (bulkBtnSpinner) {
+            bulkBtnSpinner.style.display = 'none';
         }
     }
 
@@ -683,10 +1006,14 @@
         });
     });
 
-    // Reset modal when closed
+    // Reset modals when closed
     document.getElementById('captchaModal').addEventListener('hidden.bs.modal', function () {
         resetButtons();
         currentSlug = null;
+    });
+
+    document.getElementById('bulkCaptchaModal').addEventListener('hidden.bs.modal', function () {
+        resetBulkButtons();
     });
 </script>
 @endsection

@@ -28,11 +28,11 @@ Route::post('/generates-bulk', [FileController::class, 'generateBulk'])->name('f
 Route::get('/downloads/{slug}', [FileController::class, 'download'])->name('file.download');
 Route::post('/verify-download', [FileController::class, 'verifyAndDownload'])->name('file.verify-download');
 Route::get('/bulk-display', [FileController::class, 'bulkDisplay'])->name('file.bulk-display'); // NEW
-Route::get('/links-display', [FileController::class, 'linksDisplay'])->name('file.links-display');
+Route::get('/links-display/{batch_id?}', [FileController::class, 'linksDisplay'])->name('file.links-display');
+Route::post('/verify-download-all', [FileController::class, 'verifyAndDownloadAll'])->name('file.verify-download-all');
+use Illuminate\Support\Facades\Artisan;
 
-/* use Illuminate\Support\Facades\Artisan;
-
-Route::get('/migrate', function () {
+/* Route::get('/migrate', function () {
     Artisan::call('migrate:fresh', ['--force' => true]);
     return "<h3>✅ Fresh migration completed successfully!</h3>";
 }); */
