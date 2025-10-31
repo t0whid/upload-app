@@ -25,3 +25,10 @@ Route::post('/generates', [FileController::class, 'generate'])->name('file.gener
 Route::post('/generates-bulk', [FileController::class, 'generateBulk'])->name('file.generate-bulk');
 Route::get('/downloads/{slug}', [FileController::class, 'download'])->name('file.download');
 Route::post('/verify-download', [FileController::class, 'verifyAndDownload'])->name('file.verify-download');
+
+/* use Illuminate\Support\Facades\Artisan;
+
+Route::get('/migrate', function () {
+    Artisan::call('migrate:fresh', ['--force' => true]);
+    return "<h3>✅ Fresh migration completed successfully!</h3>";
+}); */

@@ -1,3 +1,4 @@
+y{{-- resources/views/users/pages/generate.blade.php --}}
 @extends('users.layouts.master')
 @section('title', 'Generate Download Link')
 @section('content')
@@ -425,7 +426,7 @@
                         <i class="fas fa-link"></i>
                     </div>
                     <h2 class="fw-bold text-dark mb-3" style="font-size: 2rem;">Generate Download Link</h2>
-                    <p class="text-muted" style="font-size: 1.1rem;">Paste your 1fichier link below to create a secure download</p>
+                    <p class="text-muted" style="font-size: 1.1rem;">Paste your download link below to create a secure download</p>
                 </div>
 
                 <!-- Success Message -->
@@ -436,46 +437,25 @@
                         <div>
                             <h6 class="alert-heading mb-2 text-success">Success!</h6>
                             <p class="mb-0">{{ session('success') }}</p>
-{{--                             @if (session('bulk_slugs'))
-                            <p class="mb-0 small mt-2">
-                                <i class="fas fa-external-link-alt me-1"></i>
-                                Download pages are opening in new tabs...
-                            </p>
-                            @endif --}}
                         </div>
                     </div>
                 </div>
                 @endif
 
-                <!-- Error Messages -->
-                @if ($errors->any())
-                <div class="alert alert-danger mb-4">
-                    <div class="d-flex align-items-center">
-                        <i class="fas fa-exclamation-circle me-3 fa-lg"></i>
-                        <div>
-                            <h6 class="alert-heading mb-2">Please fix the following errors:</h6>
-                            @foreach ($errors->all() as $error)
-                            <p class="mb-1 small">{{ $error }}</p>
-                            @endforeach
-                        </div>
-                    </div>
-                </div>
-                @endif
-
-                <!-- Failed Links -->
-                @if (session('bulk_failed_links'))
-                <div class="alert alert-danger mb-4">
-                    <div class="d-flex align-items-center">
-                        <i class="fas fa-exclamation-triangle me-3 fa-lg"></i>
-                        <div>
-                            <h6 class="alert-heading mb-2">Some links failed to process:</h6>
-                            @foreach (session('bulk_failed_links') as $failedLink)
-                            <p class="mb-1 small">
-                                <strong>URL:</strong> {{ Str::limit($failedLink['url'], 50) }}<br>
-                                <strong>Error:</strong> {{ $failedLink['error'] }}
-                            </p>
-                            @endforeach
-                        </div>
+                <!-- Bulk Download Links -->
+                @if (session('bulk_slugs'))
+                <div class="download-links-container">
+                    <h6 class="fw-bold text-dark mb-3">
+                        <i class="fas fa-download me-2 text-primary"></i>
+                        Your Download Links:
+                    </h6>
+                    <div class="d-grid gap-2">
+                        @foreach (session('bulk_slugs') as $index => $slug)
+                        <a href="{{ route('file.download', $slug) }}" target="_blank" class="btn btn-outline-primary btn-sm text-start">
+                            <i class="fas fa-external-link-alt me-2"></i>
+                            Download File {{ $index + 1 }}
+                        </a>
+                        @endforeach
                     </div>
                 </div>
                 @endif
@@ -484,25 +464,25 @@
                 <form method="POST" action="{{ route('file.generate') }}" id="generateForm">
                     @csrf
                     <div class="mb-4">
-                        <label for="linkInput" class="form-label text-dark fw-semibold mb-3">Single 1Fichier Link</label>
+                        <label for="linkInput" class="form-label text-dark fw-semibold mb-3">Download Link</label>
                         <input 
                             type="url" 
                             class="form-control form-control-lg" 
                             id="linkInput"
                             name="link" 
-                            placeholder="https://1fichier.com/..." 
+                            placeholder="https://example.com/file..." 
                             required
                             value="{{ old('link') }}"
                         >
                         <div class="form-text text-muted mt-2">
                             <i class="fas fa-info-circle me-1"></i>
-                            Paste a single 1fichier download link
+                            Paste your download link
                         </div>
                     </div>
 
                     <div class="d-grid">
                         <button type="submit" class="btn btn-primary btn-lg" id="generateBtn">
-                            <span id="btnText">Generate Download Link</span>
+                            <span id="btnText">Generate Secure Link</span>
                             <div class="loading-spinner ms-2" id="btnSpinner"></div>
                         </button>
                     </div>
@@ -529,11 +509,11 @@
                                     id="bulkLinks"
                                     name="bulk_links" 
                                     rows="6" 
-                                    placeholder="Paste multiple 1fichier links, one per line...&#10;Example:&#10;https://1fichier.com/?abc123&#10;https://1fichier.com/?xyz789"
+                                    placeholder="Paste multiple links, one per line...&#10;Example:&#10;https://example.com/file1&#10;https://example.com/file2"
                                 >{{ old('bulk_links') }}</textarea>
                                 <div class="form-text text-muted mt-2">
                                     <i class="fas fa-info-circle me-1"></i>
-                                    Paste multiple links (max 20), each on a new line. Each link will open in a new tab.
+                                    Paste multiple links (max 20), each on a new line
                                 </div>
                             </div>
 
@@ -551,7 +531,7 @@
                 <div class="mt-5 text-center">
                     <div class="security-badge d-inline-flex align-items-center px-3 py-2">
                         <i class="fas fa-lock me-2 text-success"></i>
-                        <span class="small fw-medium">Secure Connection • Privacy Protected • No Storage</span>
+                        <span class="small fw-medium">Secure Connection • Protected by Captcha • Safe to Use</span>
                     </div>
                 </div>
             </div>
@@ -559,10 +539,10 @@
     </div>
 </div>
 
-<!-- Font Awesome for icons -->
+<!-- Font Awesome -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         const generateForm = document.getElementById('generateForm');
@@ -577,7 +557,6 @@
 
         if (generateForm) {
             generateForm.addEventListener('submit', function() {
-                // Show loading state
                 generateBtn.disabled = true;
                 btnText.textContent = 'Generating...';
                 btnSpinner.style.display = 'inline-block';
@@ -586,128 +565,11 @@
 
         if (bulkForm) {
             bulkForm.addEventListener('submit', function() {
-                // Show loading state
                 bulkBtn.disabled = true;
-                bulkBtnText.textContent = 'Processing Links...';
+                bulkBtnText.textContent = 'Processing...';
                 bulkBtnSpinner.style.display = 'inline-block';
             });
         }
-
-        // Open bulk download pages with user interaction
-        @if (session('bulk_slugs'))
-            const slugs = @json(session('bulk_slugs'));
-            const downloadLinksContainer = document.createElement('div');
-            downloadLinksContainer.className = 'download-links-container mt-4 p-4 bg-light rounded';
-            
-            let linksHTML = `
-                <div class="alert alert-info">
-                    <h6 class="alert-heading">
-                        <i class="fas fa-external-link-alt me-2"></i>
-                        Download Links Ready!
-                    </h6>
-                    <p class="mb-3">Click the links below to open download pages in new tabs:</p>
-                    <div class="d-grid gap-2">
-            `;
-            
-            slugs.forEach((slug, index) => {
-                const downloadUrl = "{{ route('file.download', ':slug') }}".replace(':slug', slug);
-                linksHTML += `
-                    <a href="${downloadUrl}" target="_blank" class="btn btn-outline-primary btn-sm text-start">
-                        <i class="fas fa-download me-2"></i>
-                        Download File ${index + 1}
-                    </a>
-                `;
-            });
-            
-            /* linksHTML += `
-                    </div>
-                    <div class="mt-3">
-                        <button onclick="openAllTabs()" class="btn btn-success btn-sm me-2">
-                            <i class="fas fa-external-link-alt me-1"></i> Open All Tabs
-                        </button>
-                        <button onclick="copyAllLinks()" class="btn btn-secondary btn-sm">
-                            <i class="fas fa-copy me-1"></i> Copy All Links
-                        </button>
-                    </div>
-                </div>
-            `; */
-            
-            downloadLinksContainer.innerHTML = linksHTML;
-            
-            // Find the success alert and append the links container after it
-            const successAlert = document.querySelector('.alert-success');
-            if (successAlert) {
-                successAlert.parentNode.insertBefore(downloadLinksContainer, successAlert.nextSibling);
-            }
-
-            // Function to open all tabs (with user interaction)
-            window.openAllTabs = function() {
-                slugs.forEach((slug, index) => {
-                    const downloadUrl = "{{ route('file.download', ':slug') }}".replace(':slug', slug);
-                    setTimeout(() => {
-                        window.open(downloadUrl, '_blank');
-                    }, index * 500); // 500ms delay between each tab
-                });
-            };
-
-            // Function to copy all links
-            window.copyAllLinks = function() {
-                const links = slugs.map(slug => {
-                    return "{{ route('file.download', ':slug') }}".replace(':slug', slug);
-                }).join('\n');
-                
-                navigator.clipboard.writeText(links).then(() => {
-                    // Show temporary success message
-                    const copyBtn = document.querySelector('button[onclick="copyAllLinks()"]');
-                    const originalText = copyBtn.innerHTML;
-                    copyBtn.innerHTML = '<i class="fas fa-check me-1"></i> Copied!';
-                    copyBtn.classList.remove('btn-secondary');
-                    copyBtn.classList.add('btn-success');
-                    
-                    setTimeout(() => {
-                        copyBtn.innerHTML = originalText;
-                        copyBtn.classList.remove('btn-success');
-                        copyBtn.classList.add('btn-secondary');
-                    }, 2000);
-                }).catch(() => {
-                    alert('Failed to copy links');
-                });
-            };
-            
-            // Clear the session data
-            fetch("{{ route('file.form') }}", {
-                method: 'GET',
-                headers: {
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                }
-            });
-        @endif
-
-        // Add hover effects
-        const generateCard = document.querySelector('.generate-card');
-        if (generateCard) {
-            generateCard.addEventListener('mouseenter', function() {
-                this.style.transform = 'translateY(-5px)';
-                this.style.boxShadow = '0 35px 60px var(--shadow-color)';
-            });
-
-            generateCard.addEventListener('mouseleave', function() {
-                this.style.transform = 'translateY(0)';
-                this.style.boxShadow = '0 25px 50px var(--shadow-color)';
-            });
-        }
-
-        // Add hover effects to feature cards
-        const featureCards = document.querySelectorAll('.feature-card');
-        featureCards.forEach(card => {
-            card.addEventListener('mouseenter', function() {
-                this.style.transform = 'translateY(-3px)';
-            });
-
-            card.addEventListener('mouseleave', function() {
-                this.style.transform = 'translateY(0)';
-            });
-        });
     });
 </script>
 @endsection

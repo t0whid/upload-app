@@ -4,7 +4,6 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 use App\Models\TemporaryFile;
 
@@ -25,7 +24,7 @@ class FileController extends Controller
 
         $fileLink = $request->link;
         
-        // Process single link
+        // Process single link (NO API CALL)
         $result = $this->processSingleLink($fileLink);
         
         if (!$result['success']) {
@@ -66,9 +65,6 @@ class FileController extends Controller
                     'error' => $result['message']
                 ];
             }
-            
-            // Add delay to avoid API rate limiting
-            usleep(500000); // 0.5 second delay
         }
 
         // Store successful slugs in session for JavaScript to open tabs
@@ -93,38 +89,16 @@ class FileController extends Controller
         return array_unique($matches[0] ?? []);
     }
 
-    // Process single link
+    // Process single link - NO API CALL
     private function processSingleLink($fileLink, $batchId = null)
     {
-        $apiKey = env('ONEFICHIER_API_KEY');
-
         try {
-            // Call 1fichier API
-            $response = Http::timeout(30)->withHeaders([
-                'Authorization' => 'Bearer ' . $apiKey,
-            ])->post('https://api.1fichier.com/v1/download/get_token.cgi', [
-                'url' => $fileLink,
-                'inline' => 0,
-                'single' => 1,
-                'cdn' => 0
-            ]);
-
-            $data = $response->json();
-
-            if (!isset($data['url']) || ($data['status'] !== 'OK' && $data['status'] !== 'ok')) {
-                return [
-                    'success' => false,
-                    'message' => 'Failed to generate download link.'
-                ];
-            }
-
-            $directUrl = $data['url'];
             $slug = Str::random(12);
 
-            // Store in database
+            // Store in database - store the original link directly
             TemporaryFile::create([
                 'slug' => $slug,
-                'download_url' => $directUrl,
+                'download_url' => $fileLink, // Store original link
                 'original_url' => $fileLink,
                 'expires_at' => now()->addHours(72),
                 'batch_id' => $batchId
@@ -161,7 +135,7 @@ class FileController extends Controller
         ]);
     }
 
-    // Verify hCaptcha and serve download
+    // Verify hCaptcha and redirect to original link
     public function verifyAndDownload(Request $request)
     {
         $request->validate([
@@ -194,6 +168,7 @@ class FileController extends Controller
             ]);
         }
 
+        // Return the original link for redirection
         return response()->json([
             'success' => true,
             'download_url' => $file->download_url
