@@ -7,7 +7,7 @@ use App\Http\Controllers\FileController;
 use App\Http\Controllers\UploadController;
 use App\Http\Controllers\DownloadController;
 
-Route::get('/upload', function () {
+Route::get('/uploads', function () {
     return view('users.pages.upload');
 })->name('upload.form');
 
@@ -21,7 +21,7 @@ Route::post('/captcha/refresh', [DownloadController::class, 'refreshCaptcha'])->
 Route::get('/download/single/{slug}', [DownloadController::class, 'showSingle'])->name('download.single');
 
 Route::get('/', [FileController::class, 'showForm'])->name('file.form');
-Route::post('/generates', [FileController::class, 'generate'])->name('file.generate');
+Route::post('/', [FileController::class, 'generate'])->name('file.generate');
 Route::post('/generates-links', [FileController::class, 'generateLinks'])->name('file.generate-links');
 
 Route::post('/generates-bulk', [FileController::class, 'generateBulk'])->name('file.generate-bulk');
