@@ -114,7 +114,7 @@ class FileController extends Controller
                 'slug' => $slug,
                 'download_url' => $fileLink,
                 'original_url' => $fileLink,
-                'expires_at' => now()->addHours(72),
+                'expires_at' => null,
                 'batch_id' => $batchId,
                 'file_order' => $index,
                 'metadata' => json_encode($metadata)
