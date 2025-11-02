@@ -213,6 +213,53 @@
         color: var(--success);
     }
 
+    .invalid-links-list {
+        background: rgba(239, 68, 68, 0.1);
+        border: 1px solid rgba(239, 68, 68, 0.3);
+        border-radius: 8px;
+        padding: 15px;
+        margin-top: 10px;
+        display: none;
+    }
+
+    .invalid-links-list.show {
+        display: block;
+    }
+
+    .invalid-links-title {
+        font-weight: 600;
+        color: var(--danger);
+        margin-bottom: 8px;
+        font-size: 0.9rem;
+    }
+
+    .invalid-link-item {
+        display: flex;
+        justify-content: between;
+        align-items: center;
+        padding: 5px 0;
+        border-bottom: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+    .invalid-link-item:last-child {
+        border-bottom: none;
+    }
+
+    .invalid-link-url {
+        flex: 1;
+        font-family: 'Courier New', monospace;
+        font-size: 0.8rem;
+        color: var(--text-secondary);
+        word-break: break-all;
+    }
+
+    .invalid-link-length {
+        color: var(--danger);
+        font-weight: 600;
+        font-size: 0.8rem;
+        margin-left: 10px;
+    }
+
     /* Custom Alert Modal */
     .custom-alert-modal {
         position: fixed;
@@ -237,7 +284,7 @@
         border-radius: 16px;
         border: 1px solid var(--border-color);
         padding: 30px;
-        max-width: 450px;
+        max-width: 500px;
         width: 90%;
         box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
         animation: alertSlideIn 0.3s ease-out;
@@ -355,6 +402,16 @@
         .btn-alert {
             flex: none;
         }
+
+        .invalid-link-item {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .invalid-link-length {
+            margin-left: 0;
+            margin-top: 2px;
+        }
     }
 
     @media (max-width: 480px) {
@@ -420,9 +477,18 @@
                 <div class="link-count">
                     <div class="form-text">
                         <i class="fas fa-info-circle me-1"></i>
-                        Paste one link or multiple links (max 20), each on a new line
+                        Maximum 20 links, each link max 100 characters
                     </div>
                     <div class="count" id="linkCount">0 links</div>
+                </div>
+
+                <!-- Invalid Links List -->
+                <div class="invalid-links-list" id="invalidLinksList">
+                    <div class="invalid-links-title">
+                        <i class="fas fa-exclamation-circle me-1"></i>
+                        Links exceeding 100 characters:
+                    </div>
+                    <div id="invalidLinksContainer"></div>
                 </div>
             </div>
 
@@ -466,6 +532,31 @@
     </div>
 </div>
 
+<!-- Character Limit Alert Modal -->
+<div class="custom-alert-modal" id="charLimitAlertModal">
+    <div class="custom-alert">
+        <div class="alert-icon">
+            <i class="fas fa-exclamation-circle" style="color: var(--danger);"></i>
+        </div>
+        <div class="alert-title" style="color: var(--danger);">Character Limit Exceeded!</div>
+        <div class="alert-message" id="charLimitMessage">
+            Some links exceed the 100 character limit. Please shorten the links below 100 characters.
+        </div>
+        <div class="invalid-links-list show" style="margin: 15px 0; max-height: 200px; overflow-y: auto;">
+            <div class="invalid-links-title">
+                <i class="fas fa-exclamation-circle me-1"></i>
+                Links exceeding 100 characters:
+            </div>
+            <div id="charLimitInvalidLinks"></div>
+        </div>
+        <div class="alert-actions">
+            <button type="button" class="btn-alert btn-alert-secondary" id="charLimitCancelBtn">
+                OK
+            </button>
+        </div>
+    </div>
+</div>
+
 <!-- Font Awesome -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
@@ -477,6 +568,8 @@
         const generateBtn = document.getElementById('generateBtn');
         const btnText = document.getElementById('btnText');
         const btnSpinner = document.getElementById('btnSpinner');
+        const invalidLinksList = document.getElementById('invalidLinksList');
+        const invalidLinksContainer = document.getElementById('invalidLinksContainer');
         
         // Alert modal elements
         const customAlertModal = document.getElementById('customAlertModal');
@@ -485,6 +578,12 @@
         const alertLinkCount = document.getElementById('alertLinkCount');
         const alertCancelBtn = document.getElementById('alertCancelBtn');
         const alertProceedBtn = document.getElementById('alertProceedBtn');
+
+        // Character limit alert elements
+        const charLimitAlertModal = document.getElementById('charLimitAlertModal');
+        const charLimitMessage = document.getElementById('charLimitMessage');
+        const charLimitInvalidLinks = document.getElementById('charLimitInvalidLinks');
+        const charLimitCancelBtn = document.getElementById('charLimitCancelBtn');
 
         let linkCountValue = 0;
         let currentLinks = [];
@@ -496,7 +595,17 @@
             return matches ? matches : [];
         }
 
-        // Function to update link count
+        // Function to check if link exceeds character limit
+        function checkLinkCharacterLimit(link) {
+            return link.length > 100;
+        }
+
+        // Function to get invalid links (exceeding character limit)
+        function getInvalidLinks(links) {
+            return links.filter(link => checkLinkCharacterLimit(link));
+        }
+
+        // Function to update link count and show invalid links
         function updateLinkCount() {
             const text = linksInput.value;
             const links = extractLinks(text);
@@ -522,22 +631,72 @@
                 linksInput.classList.remove('warning');
                 linksInput.classList.add('error');
             }
+
+            // Check for invalid links (character limit)
+            const invalidLinks = getInvalidLinks(links);
+            if (invalidLinks.length > 0) {
+                showInvalidLinks(invalidLinks);
+            } else {
+                hideInvalidLinks();
+            }
         }
 
-        // Function to show custom alert
+        // Function to show invalid links list
+        function showInvalidLinks(invalidLinks) {
+            invalidLinksContainer.innerHTML = '';
+            
+            invalidLinks.forEach(link => {
+                const linkItem = document.createElement('div');
+                linkItem.className = 'invalid-link-item';
+                linkItem.innerHTML = `
+                    <div class="invalid-link-url">${link}</div>
+                    <div class="invalid-link-length">${link.length} chars</div>
+                `;
+                invalidLinksContainer.appendChild(linkItem);
+            });
+            
+            invalidLinksList.classList.add('show');
+        }
+
+        // Function to hide invalid links list
+        function hideInvalidLinks() {
+            invalidLinksList.classList.remove('show');
+        }
+
+        // Function to show custom alert for too many links
         function showCustomAlert(linkCount) {
             alertLinkCount.textContent = linkCount;
             customAlertModal.classList.add('show');
+            document.body.style.overflow = 'hidden';
+        }
+
+        // Function to show character limit alert
+        function showCharLimitAlert(invalidLinks) {
+            charLimitInvalidLinks.innerHTML = '';
             
-            // Disable body scroll
+            invalidLinks.forEach(link => {
+                const linkItem = document.createElement('div');
+                linkItem.className = 'invalid-link-item';
+                linkItem.innerHTML = `
+                    <div class="invalid-link-url">${link}</div>
+                    <div class="invalid-link-length">${link.length} chars</div>
+                `;
+                charLimitInvalidLinks.appendChild(linkItem);
+            });
+            
+            charLimitAlertModal.classList.add('show');
             document.body.style.overflow = 'hidden';
         }
 
         // Function to hide custom alert
         function hideCustomAlert() {
             customAlertModal.classList.remove('show');
-            
-            // Enable body scroll
+            document.body.style.overflow = '';
+        }
+
+        // Function to hide character limit alert
+        function hideCharLimitAlert() {
+            charLimitAlertModal.classList.remove('show');
             document.body.style.overflow = '';
         }
 
@@ -580,6 +739,13 @@
                 return;
             }
 
+            // Check for links exceeding character limit
+            const invalidLinks = getInvalidLinks(links);
+            if (invalidLinks.length > 0) {
+                showCharLimitAlert(invalidLinks);
+                return;
+            }
+
             // Check if more than 20 links
             if (links.length > 20) {
                 showCustomAlert(links.length);
@@ -603,52 +769,52 @@
 
         // Event listeners
         if (linksInput) {
-            // Update count on input
             linksInput.addEventListener('input', updateLinkCount);
-            
-            // Initial count update
-            updateLinkCount();
-
-            // Paste event listener for immediate feedback
             linksInput.addEventListener('paste', function(e) {
                 setTimeout(updateLinkCount, 100);
             });
+            updateLinkCount();
         }
 
-        // Generate button click event
         if (generateBtn) {
             generateBtn.addEventListener('click', processFormSubmission);
         }
 
         // Alert modal button events
         if (alertCancelBtn) {
-            alertCancelBtn.addEventListener('click', function() {
-                hideCustomAlert();
-            });
+            alertCancelBtn.addEventListener('click', hideCustomAlert);
         }
 
         if (alertProceedBtn) {
             alertProceedBtn.addEventListener('click', function() {
-                // Truncate to first 20 links and submit
                 truncateToFirst20Links();
                 hideCustomAlert();
                 submitForm();
             });
         }
 
-        // Close alert when clicking outside
-        if (customAlertModal) {
-            customAlertModal.addEventListener('click', function(e) {
-                if (e.target === customAlertModal) {
-                    hideCustomAlert();
-                }
-            });
+        // Character limit alert button events
+        if (charLimitCancelBtn) {
+            charLimitCancelBtn.addEventListener('click', hideCharLimitAlert);
         }
 
-        // Close alert with Escape key
+        // Close modals when clicking outside
+        [customAlertModal, charLimitAlertModal].forEach(modal => {
+            if (modal) {
+                modal.addEventListener('click', function(e) {
+                    if (e.target === modal) {
+                        if (modal === customAlertModal) hideCustomAlert();
+                        if (modal === charLimitAlertModal) hideCharLimitAlert();
+                    }
+                });
+            }
+        });
+
+        // Close modals with Escape key
         document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape' && customAlertModal.classList.contains('show')) {
-                hideCustomAlert();
+            if (e.key === 'Escape') {
+                if (customAlertModal.classList.contains('show')) hideCustomAlert();
+                if (charLimitAlertModal.classList.contains('show')) hideCharLimitAlert();
             }
         });
     });

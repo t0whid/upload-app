@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
-use Illuminate\Support\Facades\Http;
 use App\Models\TemporaryFile;
 
 class FileController extends Controller
@@ -68,7 +67,6 @@ class FileController extends Controller
 
         // Get files from database using batch_id
         $files = TemporaryFile::where('batch_id', $batchId)
-                            ->where('expires_at', '>', now())
                             ->orderBy('file_order')
                             ->get();
 
@@ -89,7 +87,7 @@ class FileController extends Controller
             'batch_id' => $batchId,
             'links' => $processedLinks,
             'total_files' => count($processedLinks),
-            'shareable_url' => route('file.links-display', ['batch_id' => $batchId]) // Shareable URL
+            'shareable_url' => route('file.links-display', ['batch_id' => $batchId])
         ]);
     }
 
@@ -198,26 +196,12 @@ class FileController extends Controller
         return 'Download File';
     }
 
-    // Verify hCaptcha and return original link
+    // Verify and return original link - NO CAPTCHA
     public function verifyAndDownload(Request $request)
     {
         $request->validate([
-            'h-captcha-response' => 'required|string',
             'slug' => 'required|string'
         ]);
-
-        // For development, bypass hCaptcha if no secret key
-        $secret = env('HCAPTCHA_SECRET_KEY');
-        if (!$secret || app()->environment('local')) {
-            \Log::info('hCaptcha bypassed');
-        } else {
-            if (!$this->verifyHCaptcha($request->input('h-captcha-response'))) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Captcha verification failed. Please try again.'
-                ], 422);
-            }
-        }
 
         $slug = $request->slug;
         $file = TemporaryFile::where('slug', $slug)
@@ -238,27 +222,12 @@ class FileController extends Controller
         ]);
     }
 
-    // Verify hCaptcha and unlock ALL links in batch
+    // Verify and unlock ALL links in batch - NO CAPTCHA
     public function verifyAndDownloadAll(Request $request)
     {
         $request->validate([
-            'h-captcha-response' => 'required|string',
             'batch_id' => 'required|string'
         ]);
-
-        // For development, bypass hCaptcha if no secret key
-        $secret = env('HCAPTCHA_SECRET_KEY');
-        if (!$secret || app()->environment('local')) {
-            \Log::info('hCaptcha bypassed for batch download');
-        } else {
-            // Verify hCaptcha in production
-            if (!$this->verifyHCaptcha($request->input('h-captcha-response'))) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Captcha verification failed. Please try again.'
-                ], 422);
-            }
-        }
 
         $batchId = $request->batch_id;
         $files = TemporaryFile::where('batch_id', $batchId)
@@ -288,26 +257,63 @@ class FileController extends Controller
         ]);
     }
 
-    private function verifyHCaptcha($token)
+    // Alternative method to handle downloads without captcha
+    public function directDownload($slug)
     {
-        $secret = env('HCAPTCHA_SECRET_KEY');
-        
-        if (!$secret) {
-            return true;
+        $file = TemporaryFile::where('slug', $slug)
+                            ->where('expires_at', '>', now())
+                            ->first();
+
+        if (!$file) {
+            return redirect()->route('file.form')->withErrors(['error' => 'Download link expired or invalid.']);
         }
 
+        return redirect()->away($file->download_url);
+    }
+
+    // Clean up expired files (can be called via scheduler)
+    public function cleanupExpiredFiles()
+    {
         try {
-            $response = Http::asForm()->timeout(10)->post('https://hcaptcha.com/siteverify', [
-                'secret' => $secret,
-                'response' => $token
-            ]);
-
-            $data = $response->json();
-            
-            return isset($data['success']) && $data['success'] === true;
+            $deleted = TemporaryFile::where('expires_at', '<', now())->delete();
+            \Log::info("Cleaned up {$deleted} expired files.");
+            return $deleted;
         } catch (\Exception $e) {
-            \Log::error('hCaptcha verification error: ' . $e->getMessage());
-            return false;
+            \Log::error('Cleanup error: ' . $e->getMessage());
+            return 0;
         }
+    }
+
+    // Get batch info (for API)
+    public function getBatchInfo($batch_id)
+    {
+        $files = TemporaryFile::where('batch_id', $batch_id)
+                            ->where('expires_at', '>', now())
+                            ->get();
+
+        if ($files->isEmpty()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Batch not found or expired'
+            ], 404);
+        }
+
+        $links = [];
+        foreach ($files as $file) {
+            $links[] = [
+                'slug' => $file->slug,
+                'original_url' => $file->original_url,
+                'metadata' => json_decode($file->metadata, true),
+                'expires_at' => $file->expires_at
+            ];
+        }
+
+        return response()->json([
+            'success' => true,
+            'batch_id' => $batch_id,
+            'total_files' => count($links),
+            'expires_at' => $files->first()->expires_at,
+            'links' => $links
+        ]);
     }
 }

@@ -330,44 +330,6 @@
         color: white !important;
     }
 
-    /* Captcha Modal - Fixed and Responsive */
-    .captcha-modal .modal-content {
-        background: var(--card-bg);
-        border-radius: 16px;
-        border: 1px solid var(--border-color);
-        color: var(--text-primary);
-        max-width: 450px;
-        margin: 0 auto;
-    }
-
-    .captcha-modal .modal-header {
-        border-bottom: 1px solid var(--border-color);
-        padding: 20px 25px 15px;
-    }
-
-    .captcha-modal .modal-title {
-        color: var(--text-primary) !important;
-        font-weight: 600;
-    }
-
-    .captcha-modal .btn-close {
-        filter: invert(1) brightness(2);
-    }
-
-    .captcha-modal .modal-body {
-        padding: 0;
-    }
-
-    .captcha-section {
-        padding: 25px;
-        text-align: center;
-    }
-
-    .captcha-section p {
-        color: var(--text-secondary) !important;
-        margin-bottom: 20px;
-    }
-
     .file-count-badge {
         background: linear-gradient(135deg, var(--primary), var(--primary-dark));
         color: white;
@@ -463,15 +425,6 @@
         .file-card {
             max-width: 100%;
         }
-
-        .captcha-modal .modal-dialog {
-            margin: 10px;
-            max-width: calc(100% - 20px);
-        }
-
-        .captcha-modal .modal-content {
-            max-width: 100%;
-        }
     }
 
     @media (max-width: 480px) {
@@ -503,10 +456,6 @@
             font-size: 1.2rem;
         }
 
-        .captcha-section {
-            padding: 20px;
-        }
-
         .header-section {
             padding: 20px;
         }
@@ -527,7 +476,7 @@
                 </span>
             </div>
             <p class="text-muted mb-0">
-                Unlock individual links or use "UNLOCK ALL" to get all links with one captcha.
+                Click "UNLOCK LINK" to get the download link instantly.
             </p>
         </div>
 
@@ -547,12 +496,6 @@
                     <span id="copyUrlText">COPY</span>
                 </button>
             </div>
-            <div class="mt-2">
-                <small class="text-muted">
-                    <i class="fas fa-info-circle me-1"></i>
-                    Share this link with others. Links expire in 72 hours.
-                </small>
-            </div>
         </div>
 
         <!-- Bulk Action Section -->
@@ -562,9 +505,9 @@
                 Unlock All Links
             </h4>
             <p class="bulk-action-desc">
-                Complete one captcha to unlock all {{ $total_files }} download links at once
+                Click to unlock all {{ $total_files }} download links at once
             </p>
-            <button class="btn-unlock-all" onclick="openBulkCaptchaModal()" id="bulkUnlockBtn">
+            <button class="btn-unlock-all" onclick="unlockAllLinks()" id="bulkUnlockBtn">
                 <i class="fas fa-unlock-alt me-1"></i>
                 <span id="bulkBtnText">UNLOCK ALL LINKS</span>
                 <div class="loading-spinner ms-1" id="bulkBtnSpinner" style="display: none;"></div>
@@ -605,7 +548,7 @@
                     </div>
                     
                     <div class="file-actions">
-                        <button class="btn-unlock" onclick="openCaptchaModal('{{ $linkData['slug'] }}')" id="btn-{{ $linkData['slug'] }}">
+                        <button class="btn-unlock" onclick="unlockLink('{{ $linkData['slug'] }}')" id="btn-{{ $linkData['slug'] }}">
                             <i class="fas fa-lock-open me-1"></i>
                             <span id="btn-text-{{ $linkData['slug'] }}">UNLOCK LINK</span>
                             <div class="loading-spinner ms-1" id="spinner-{{ $linkData['slug'] }}" style="display: none;"></div>
@@ -624,68 +567,14 @@
         <!-- Footer -->
         <div class="header-section text-center">
             <div class="security-badge d-inline-flex align-items-center px-3 py-2 mb-3">
-                <i class="fas fa-lock me-2 text-success"></i>
-                <span class="small fw-medium">All downloads protected by Captcha • Secure Connection</span>
+                <i class="fas fa-shield-alt me-2 text-success"></i>
+                <span class="small fw-medium">Secure Download Links • Direct Access</span>
             </div>
             
             <a href="{{ route('file.form') }}" class="btn btn-outline-primary">
                 <i class="fas fa-plus me-2"></i>
                 Generate New Links
             </a>
-        </div>
-    </div>
-</div>
-
-<!-- Individual Captcha Modal -->
-<div class="modal fade captcha-modal" id="captchaModal" tabindex="-1" aria-labelledby="captchaModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title fw-bold" id="captchaModalLabel">
-                    <i class="fas fa-robot me-2 text-primary"></i>
-                    Verify Captcha
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <div class="captcha-section">
-                    <p class="mb-4">Complete the captcha to unlock the download link</p>
-                    
-                    <div class="h-captcha mb-4" data-sitekey="<?php echo env('HCAPTCHA_SITE_KEY', 'your-site-key'); ?>" id="modalCaptcha"></div>
-                    
-                    <button class="btn-unlock w-100" onclick="verifyAndDownload()" id="modalVerifyBtn">
-                        <i class="fas fa-check me-1"></i>
-                        VERIFY & UNLOCK
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Bulk Captcha Modal -->
-<div class="modal fade captcha-modal" id="bulkCaptchaModal" tabindex="-1" aria-labelledby="bulkCaptchaModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title fw-bold" id="bulkCaptchaModalLabel">
-                    <i class="fas fa-robot me-2 text-warning"></i>
-                    Unlock All Links
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <div class="captcha-section">
-                    <p class="mb-4">Complete one captcha to unlock all {{ $total_files }} download links</p>
-                    
-                    <div class="h-captcha mb-4" data-sitekey="<?php echo env('HCAPTCHA_SITE_KEY', 'your-site-key'); ?>" id="bulkModalCaptcha"></div>
-                    
-                    <button class="btn-unlock-all w-100" onclick="verifyAndDownloadAll()" id="bulkModalVerifyBtn">
-                        <i class="fas fa-check me-1"></i>
-                        UNLOCK ALL LINKS
-                    </button>
-                </div>
-            </div>
         </div>
     </div>
 </div>
@@ -706,87 +595,19 @@
 <!-- Font Awesome & Bootstrap -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<!-- hCaptcha -->
-<script src="https://js.hcaptcha.com/1/api.js" async defer></script>
 
 <script>
-    let currentSlug = null;
-    const captchaModal = new bootstrap.Modal(document.getElementById('captchaModal'));
-    const bulkCaptchaModal = new bootstrap.Modal(document.getElementById('bulkCaptchaModal'));
     const successToast = new bootstrap.Toast(document.getElementById('successToast'));
 
-    function copyShareUrl() {
-        const shareUrlInput = document.getElementById('shareUrlInput');
-        const copyUrlBtn = document.getElementById('copyUrlBtn');
-        const copyUrlText = document.getElementById('copyUrlText');
-        
-        shareUrlInput.select();
-        shareUrlInput.setSelectionRange(0, 99999);
-        
-        navigator.clipboard.writeText(shareUrlInput.value).then(() => {
-            // Show copied state
-            copyUrlBtn.classList.add('copied');
-            copyUrlBtn.innerHTML = '<i class="fas fa-check me-1"></i><span>COPIED!</span>';
-            
-            // Show success toast
-            document.getElementById('toastMessage').textContent = 'Shareable link copied to clipboard!';
-            successToast.show();
-            
-            // Reset after 2 seconds
-            setTimeout(() => {
-                copyUrlBtn.classList.remove('copied');
-                copyUrlBtn.innerHTML = '<i class="fas fa-copy me-1"></i><span>COPY</span>';
-            }, 2000);
-            
-        }).catch(() => {
-            alert('Failed to copy link');
-        });
-    }
-
-    function openCaptchaModal(slug) {
-        currentSlug = slug;
-        captchaModal.show();
-        
-        // Reset hCaptcha when modal opens
-        setTimeout(() => {
-            if (typeof hcaptcha !== 'undefined') {
-                hcaptcha.reset(document.querySelector('#modalCaptcha'));
-            }
-        }, 500);
-    }
-
-    function openBulkCaptchaModal() {
-        bulkCaptchaModal.show();
-        
-        // Reset hCaptcha when modal opens
-        setTimeout(() => {
-            if (typeof hcaptcha !== 'undefined') {
-                hcaptcha.reset(document.querySelector('#bulkModalCaptcha'));
-            }
-        }, 500);
-    }
-
-    async function verifyAndDownload() {
-        const hcaptchaResponse = document.querySelector('#modalCaptcha [name="h-captcha-response"]');
-        const modalVerifyBtn = document.getElementById('modalVerifyBtn');
-        const unlockBtn = document.getElementById(`btn-${currentSlug}`);
-        const copyBtn = document.getElementById(`copy-btn-${currentSlug}`);
-        const linkDisplay = document.getElementById(`link-display-${currentSlug}`);
-        const linkText = document.getElementById(`link-text-${currentSlug}`);
-        const btnText = document.getElementById(`btn-text-${currentSlug}`);
-        const spinner = document.getElementById(`spinner-${currentSlug}`);
-
-        if (!hcaptchaResponse || !hcaptchaResponse.value) {
-            alert('Please complete the captcha verification first.');
-            return;
-        }
+    // Unlock single link
+    async function unlockLink(slug) {
+        const unlockBtn = document.getElementById(`btn-${slug}`);
+        const btnText = document.getElementById(`btn-text-${slug}`);
+        const spinner = document.getElementById(`spinner-${slug}`);
 
         // Show loading state
-        modalVerifyBtn.disabled = true;
-        modalVerifyBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> VERIFYING...';
-        
         unlockBtn.disabled = true;
-        btnText.textContent = 'VERIFYING...';
+        btnText.textContent = 'UNLOCKING...';
         spinner.style.display = 'inline-block';
 
         try {
@@ -798,13 +619,12 @@
                     'Accept': 'application/json'
                 },
                 body: JSON.stringify({
-                    'h-captcha-response': hcaptchaResponse.value,
-                    slug: currentSlug
+                    slug: slug
                 })
             });
 
             const data = await response.json();
-
+            
             if (data.success) {
                 // Update UI to show unlocked state
                 unlockBtn.innerHTML = '<i class="fas fa-check me-1"></i><span>UNLOCKED</span>';
@@ -812,44 +632,39 @@
                 unlockBtn.disabled = true;
                 
                 // Show link and copy button
+                const linkText = document.getElementById(`link-text-${slug}`);
+                const linkDisplay = document.getElementById(`link-display-${slug}`);
+                const copyBtn = document.getElementById(`copy-btn-${slug}`);
+                
                 linkText.textContent = data.download_url;
                 linkDisplay.style.display = 'block';
                 copyBtn.style.display = 'flex';
                 
-                // Close modal
-                captchaModal.hide();
+                // Hide spinner
+                spinner.style.display = 'none';
                 
                 // Show success toast
                 document.getElementById('toastMessage').textContent = 'Link unlocked successfully!';
                 successToast.show();
                 
             } else {
-                alert(data.message || 'Verification failed. Please try again.');
-                resetButtons();
+                alert(data.message || 'Failed to unlock link. Please try again.');
+                resetButton(slug);
             }
         } catch (error) {
-            console.error('Verification error:', error);
+            console.error('Unlock error:', error);
             alert('Network error. Please try again.');
-            resetButtons();
+            resetButton(slug);
         }
     }
 
-    async function verifyAndDownloadAll() {
-        const hcaptchaResponse = document.querySelector('#bulkModalCaptcha [name="h-captcha-response"]');
-        const bulkModalVerifyBtn = document.getElementById('bulkModalVerifyBtn');
+    // Unlock all links
+    async function unlockAllLinks() {
         const bulkUnlockBtn = document.getElementById('bulkUnlockBtn');
         const bulkBtnText = document.getElementById('bulkBtnText');
         const bulkBtnSpinner = document.getElementById('bulkBtnSpinner');
 
-        if (!hcaptchaResponse || !hcaptchaResponse.value) {
-            alert('Please complete the captcha verification first.');
-            return;
-        }
-
         // Show loading state
-        bulkModalVerifyBtn.disabled = true;
-        bulkModalVerifyBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> UNLOCKING ALL...';
-        
         bulkUnlockBtn.disabled = true;
         bulkBtnText.textContent = 'UNLOCKING ALL...';
         bulkBtnSpinner.style.display = 'inline-block';
@@ -863,13 +678,12 @@
                     'Accept': 'application/json'
                 },
                 body: JSON.stringify({
-                    'h-captcha-response': hcaptchaResponse.value,
                     batch_id: '{{ $batch_id }}'
                 })
             });
 
             const data = await response.json();
-
+            
             if (data.success) {
                 // Unlock all links in the UI
                 data.download_links.forEach(linkData => {
@@ -894,39 +708,33 @@
                     }
                 });
 
-                // Close modal
-                bulkCaptchaModal.hide();
-                
                 // Update bulk button
                 bulkUnlockBtn.innerHTML = '<i class="fas fa-check me-1"></i><span>ALL UNLOCKED</span>';
                 bulkUnlockBtn.style.background = 'linear-gradient(135deg, #10b981, #059669)';
                 bulkUnlockBtn.disabled = true;
+                
+                // Hide spinner
+                bulkBtnSpinner.style.display = 'none';
                 
                 // Show success toast
                 document.getElementById('toastMessage').textContent = 'All links unlocked successfully!';
                 successToast.show();
                 
             } else {
-                alert(data.message || 'Verification failed. Please try again.');
-                resetBulkButtons();
+                alert(data.message || 'Failed to unlock links. Please try again.');
+                resetBulkButton();
             }
         } catch (error) {
-            console.error('Bulk verification error:', error);
+            console.error('Bulk unlock error:', error);
             alert('Network error. Please try again.');
-            resetBulkButtons();
+            resetBulkButton();
         }
     }
 
-    function resetButtons() {
-        const modalVerifyBtn = document.getElementById('modalVerifyBtn');
-        const unlockBtn = document.getElementById(`btn-${currentSlug}`);
-        const btnText = document.getElementById(`btn-text-${currentSlug}`);
-        const spinner = document.getElementById(`spinner-${currentSlug}`);
-        
-        if (modalVerifyBtn) {
-            modalVerifyBtn.disabled = false;
-            modalVerifyBtn.innerHTML = '<i class="fas fa-check me-1"></i> VERIFY & UNLOCK';
-        }
+    function resetButton(slug) {
+        const unlockBtn = document.getElementById(`btn-${slug}`);
+        const btnText = document.getElementById(`btn-text-${slug}`);
+        const spinner = document.getElementById(`spinner-${slug}`);
         
         if (unlockBtn) {
             unlockBtn.disabled = false;
@@ -943,16 +751,10 @@
         }
     }
 
-    function resetBulkButtons() {
-        const bulkModalVerifyBtn = document.getElementById('bulkModalVerifyBtn');
+    function resetBulkButton() {
         const bulkUnlockBtn = document.getElementById('bulkUnlockBtn');
         const bulkBtnText = document.getElementById('bulkBtnText');
         const bulkBtnSpinner = document.getElementById('bulkBtnSpinner');
-        
-        if (bulkModalVerifyBtn) {
-            bulkModalVerifyBtn.disabled = false;
-            bulkModalVerifyBtn.innerHTML = '<i class="fas fa-check me-1"></i> UNLOCK ALL LINKS';
-        }
         
         if (bulkUnlockBtn) {
             bulkUnlockBtn.disabled = false;
@@ -969,22 +771,43 @@
         }
     }
 
+    // Copy functions
+    function copyShareUrl() {
+        const shareUrlInput = document.getElementById('shareUrlInput');
+        const copyUrlBtn = document.getElementById('copyUrlBtn');
+        
+        shareUrlInput.select();
+        shareUrlInput.setSelectionRange(0, 99999);
+        
+        navigator.clipboard.writeText(shareUrlInput.value).then(() => {
+            copyUrlBtn.classList.add('copied');
+            copyUrlBtn.innerHTML = '<i class="fas fa-check me-1"></i><span>COPIED!</span>';
+            
+            document.getElementById('toastMessage').textContent = 'Shareable link copied to clipboard!';
+            successToast.show();
+            
+            setTimeout(() => {
+                copyUrlBtn.classList.remove('copied');
+                copyUrlBtn.innerHTML = '<i class="fas fa-copy me-1"></i><span>COPY</span>';
+            }, 2000);
+            
+        }).catch(() => {
+            alert('Failed to copy link');
+        });
+    }
+
     function copyDownloadLink(slug) {
         const linkText = document.getElementById(`link-text-${slug}`);
         const copyBtn = document.getElementById(`copy-btn-${slug}`);
-        const copyText = document.getElementById(`copy-text-${slug}`);
         
         if (linkText && linkText.textContent) {
             navigator.clipboard.writeText(linkText.textContent).then(() => {
-                // Show copied state
                 copyBtn.classList.add('btn-copied');
                 copyBtn.innerHTML = '<i class="fas fa-check me-1"></i><span>COPIED!</span>';
                 
-                // Show success toast
                 document.getElementById('toastMessage').textContent = 'Link copied to clipboard!';
                 successToast.show();
                 
-                // Reset after 2 seconds
                 setTimeout(() => {
                     copyBtn.classList.remove('btn-copied');
                     copyBtn.innerHTML = '<i class="fas fa-copy me-1"></i><span>COPY LINK</span>';
@@ -1004,16 +827,6 @@
                 this.src = 'https://www.google.com/s2/favicons?domain=example.com&sz=32';
             };
         });
-    });
-
-    // Reset modals when closed
-    document.getElementById('captchaModal').addEventListener('hidden.bs.modal', function () {
-        resetButtons();
-        currentSlug = null;
-    });
-
-    document.getElementById('bulkCaptchaModal').addEventListener('hidden.bs.modal', function () {
-        resetBulkButtons();
     });
 </script>
 @endsection

@@ -19,7 +19,7 @@ return new class extends Migration
             $table->string('batch_id')->nullable()->index();
             $table->integer('file_order')->default(0);
             $table->json('metadata')->nullable();
-            $table->timestamp('expires_at');
+            $table->timestamp('expires_at')->nullable();
             $table->timestamps();
 
             // Indexes for better performance

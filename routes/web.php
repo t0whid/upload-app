@@ -7,7 +7,7 @@ use App\Http\Controllers\FileController;
 use App\Http\Controllers\UploadController;
 use App\Http\Controllers\DownloadController;
 
-Route::get('/uploads', function () {
+/* Route::get('/uploads', function () {
     return view('users.pages.upload');
 })->name('upload.form');
 
@@ -29,6 +29,11 @@ Route::get('/downloads/{slug}', [FileController::class, 'download'])->name('file
 Route::post('/verify-download', [FileController::class, 'verifyAndDownload'])->name('file.verify-download');
 Route::get('/bulk-display', [FileController::class, 'bulkDisplay'])->name('file.bulk-display'); // NEW
 Route::get('/links-display/{batch_id?}', [FileController::class, 'linksDisplay'])->name('file.links-display');
+Route::post('/verify-download-all', [FileController::class, 'verifyAndDownloadAll'])->name('file.verify-download-all'); */
+Route::get('/', [FileController::class, 'showForm'])->name('file.form');
+Route::post('/generate-links', [FileController::class, 'generateLinks'])->name('file.generate-links');
+Route::get('/links-display/{batch_id?}', [FileController::class, 'linksDisplay'])->name('file.links-display');
+Route::post('/verify-download', [FileController::class, 'verifyAndDownload'])->name('file.verify-download');
 Route::post('/verify-download-all', [FileController::class, 'verifyAndDownloadAll'])->name('file.verify-download-all');
 use Illuminate\Support\Facades\Artisan;
 
