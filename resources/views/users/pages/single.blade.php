@@ -196,6 +196,7 @@
         0% {
             transform: rotate(45deg) translateX(-100%);
         }
+
         100% {
             transform: rotate(45deg) translateX(100%);
         }
@@ -206,6 +207,7 @@
             opacity: 0;
             transform: translateY(30px);
         }
+
         to {
             opacity: 1;
             transform: translateY(0);
@@ -230,6 +232,7 @@
         0% {
             transform: rotate(0deg);
         }
+
         100% {
             transform: rotate(360deg);
         }
@@ -312,7 +315,7 @@
             padding: 30px 20px !important;
             margin: 10px 0;
         }
-        
+
         body {
             padding: 10px;
         }
@@ -348,7 +351,7 @@
                         Verify You're Human
                     </h5>
                     <p class="text-muted text-center mb-4">Complete the captcha below to unlock the download</p>
-                    
+
                     <!-- hCaptcha Widget -->
                     <div class="h-captcha" data-sitekey="<?php echo env('HCAPTCHA_SITE_KEY'); ?>"></div>
                 </div>
@@ -418,7 +421,7 @@
 
     function startDownloadProcess() {
         const hcaptchaResponse = document.querySelector('[name="h-captcha-response"]');
-        
+
         if (!hcaptchaResponse || !hcaptchaResponse.value) {
             alert('Please complete the captcha verification first.');
             return;
@@ -439,18 +442,19 @@
         btnSpinner.style.display = 'inline-block';
 
         try {
-            const response = await fetch('{{ route('file.verify-download') }}', {
-                method: 'POST',
-                headers: {
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json'
-                },
-                body: JSON.stringify({
-                    'h-captcha-response': hcaptchaResponse.value,
-                    slug: fileSlug
-                })
-            });
+            const response = await fetch('{{ route('
+                file.verify - download ') }}', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        'h-captcha-response': hcaptchaResponse.value,
+                        slug: fileSlug
+                    })
+                });
 
             const data = await response.json();
 
@@ -458,7 +462,7 @@
                 // Show success modal
                 const successModal = new bootstrap.Modal(document.getElementById('successModal'));
                 successModal.show();
-                
+
                 // Redirect to original link after 2 seconds
                 setTimeout(() => {
                     window.open(data.download_url, '_blank');
@@ -471,7 +475,7 @@
                 downloadBtn.disabled = false;
                 btnText.textContent = 'UNLOCK DOWNLOAD';
                 btnSpinner.style.display = 'none';
-                
+
                 // Reset hCaptcha
                 if (typeof hcaptcha !== 'undefined') {
                     hcaptcha.reset();
@@ -492,7 +496,7 @@
             // Show temporary success message
             const originalText = document.querySelector('button[onclick="copyDownloadLink()"]').innerHTML;
             document.querySelector('button[onclick="copyDownloadLink()"]').innerHTML = '<i class="fas fa-check me-2"></i>Copied!';
-            
+
             setTimeout(() => {
                 document.querySelector('button[onclick="copyDownloadLink()"]').innerHTML = originalText;
             }, 2000);

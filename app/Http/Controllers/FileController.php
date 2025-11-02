@@ -24,7 +24,7 @@ class FileController extends Controller
 
         $linksText = $request->links;
         $links = $this->extractLinksFromText($linksText);
-        
+
         if (empty($links)) {
             return back()->withErrors(['links' => 'No valid links found.']);
         }
@@ -37,7 +37,7 @@ class FileController extends Controller
 
         foreach ($links as $index => $link) {
             $result = $this->processSingleLink($link, $batchId, $index);
-            
+
             if ($result['success']) {
                 $processedLinks[] = [
                     'slug' => $result['slug'],
@@ -60,15 +60,15 @@ class FileController extends Controller
     {
         // If batch_id is provided via URL, use it
         $batchId = $batch_id ?? (session('processed_links')['batch_id'] ?? null);
-        
+
         if (!$batchId) {
             return redirect()->route('file.form')->withErrors(['error' => 'No batch ID found.']);
         }
 
         // Get files from database using batch_id
         $files = TemporaryFile::where('batch_id', $batchId)
-                            ->orderBy('file_order')
-                            ->get();
+            ->orderBy('file_order')
+            ->get();
 
         if ($files->isEmpty()) {
             return redirect()->route('file.form')->withErrors(['error' => 'Download links expired or invalid.']);
@@ -96,7 +96,7 @@ class FileController extends Controller
     {
         $pattern = '/https?:\/\/[^\s]+/';
         preg_match_all($pattern, $text, $matches);
-        
+
         return array_unique($matches[0] ?? []);
     }
 
@@ -126,7 +126,6 @@ class FileController extends Controller
                 'metadata' => $metadata,
                 'message' => 'Link processed successfully.'
             ];
-
         } catch (\Exception $e) {
             \Log::error('Link processing error: ' . $e->getMessage());
             return [
@@ -142,7 +141,7 @@ class FileController extends Controller
         try {
             $host = parse_url($url, PHP_URL_HOST);
             $siteName = $this->getSiteNameFromHost($host);
-            
+
             return [
                 'host' => $host,
                 'site_name' => $siteName,
@@ -162,14 +161,14 @@ class FileController extends Controller
     private function getSiteNameFromHost($host)
     {
         if (!$host) return 'Unknown';
-        
+
         $host = str_replace('www.', '', $host);
         $parts = explode('.', $host);
-        
+
         if (count($parts) >= 2) {
             return ucfirst($parts[0]);
         }
-        
+
         return ucfirst($host);
     }
 
@@ -188,11 +187,11 @@ class FileController extends Controller
     {
         $path = parse_url($url, PHP_URL_PATH);
         $filename = basename($path);
-        
+
         if ($filename && $filename !== '/') {
             return $filename;
         }
-        
+
         return 'Download File';
     }
 
@@ -205,8 +204,8 @@ class FileController extends Controller
 
         $slug = $request->slug;
         $file = TemporaryFile::where('slug', $slug)
-                            ->where('expires_at', '>', now())
-                            ->first();
+            ->where('expires_at', '>', now())
+            ->first();
 
         if (!$file) {
             return response()->json([
@@ -231,8 +230,8 @@ class FileController extends Controller
 
         $batchId = $request->batch_id;
         $files = TemporaryFile::where('batch_id', $batchId)
-                          ->where('expires_at', '>', now())
-                          ->get();
+            ->where('expires_at', '>', now())
+            ->get();
 
         if ($files->isEmpty()) {
             return response()->json([
@@ -261,8 +260,8 @@ class FileController extends Controller
     public function directDownload($slug)
     {
         $file = TemporaryFile::where('slug', $slug)
-                            ->where('expires_at', '>', now())
-                            ->first();
+            ->where('expires_at', '>', now())
+            ->first();
 
         if (!$file) {
             return redirect()->route('file.form')->withErrors(['error' => 'Download link expired or invalid.']);
@@ -288,8 +287,8 @@ class FileController extends Controller
     public function getBatchInfo($batch_id)
     {
         $files = TemporaryFile::where('batch_id', $batch_id)
-                            ->where('expires_at', '>', now())
-                            ->get();
+            ->where('expires_at', '>', now())
+            ->get();
 
         if ($files->isEmpty()) {
             return response()->json([
