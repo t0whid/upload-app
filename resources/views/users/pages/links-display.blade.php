@@ -349,8 +349,13 @@
     }
 
     @keyframes spin {
-        0% { transform: rotate(0deg); }
-        100% { transform: rotate(360deg); }
+        0% {
+            transform: rotate(0deg);
+        }
+
+        100% {
+            transform: rotate(360deg);
+        }
     }
 
     .header-section {
@@ -395,33 +400,34 @@
         .container {
             padding: 15px;
         }
-        
-        .share-section, .bulk-action-section {
+
+        .share-section,
+        .bulk-action-section {
             margin: 0 20px 20px;
             padding: 20px;
         }
-        
+
         .share-header {
             flex-direction: column;
             gap: 15px;
             align-items: flex-start;
         }
-        
+
         .share-url-container {
             width: 100%;
         }
-        
+
         .files-grid {
             grid-template-columns: 1fr;
             gap: 15px;
             padding: 0 20px 20px;
         }
-        
+
         .downloads-card {
             margin: 10px 0;
             border-radius: 16px;
         }
-        
+
         .file-card {
             max-width: 100%;
         }
@@ -431,25 +437,26 @@
         .container {
             padding: 10px;
         }
-        
-        .share-section, .bulk-action-section {
+
+        .share-section,
+        .bulk-action-section {
             margin: 0 15px 15px;
             padding: 15px;
         }
-        
+
         .files-grid {
             padding: 0 15px 15px;
             gap: 12px;
         }
-        
+
         .file-header {
             padding: 20px 20px 15px;
         }
-        
+
         .file-content {
             padding: 15px 20px 20px;
         }
-        
+
         .file-icon {
             width: 50px;
             height: 50px;
@@ -489,8 +496,8 @@
                 </div>
             </div>
             <div class="share-url-container">
-                <input type="text" class="share-url-input" id="shareUrlInput" 
-                       value="{{ $shareable_url ?? url()->current() }}" readonly>
+                <input type="text" class="share-url-input" id="shareUrlInput"
+                    value="{{ $shareable_url ?? url()->current() }}" readonly>
                 <button class="btn-copy-url" onclick="copyShareUrl()" id="copyUrlBtn">
                     <i class="fas fa-copy me-1"></i>
                     <span id="copyUrlText">COPY</span>
@@ -518,12 +525,12 @@
         <div class="files-grid">
             @foreach($links as $index => $linkData)
             @php
-                $metadata = $linkData['metadata'] ?? [
-                    'title' => 'Download File',
-                    'site_name' => 'File Host',
-                    'host' => parse_url($linkData['original_url'], PHP_URL_HOST) ?? 'unknown',
-                    'favicon' => "https://www.google.com/s2/favicons?domain=example.com&sz=32"
-                ];
+            $metadata = $linkData['metadata'] ?? [
+            'title' => 'Download File',
+            'site_name' => 'File Host',
+            'host' => parse_url($linkData['original_url'], PHP_URL_HOST) ?? 'unknown',
+            'favicon' => "https://www.google.com/s2/favicons?domain=example.com&sz=32"
+            ];
             @endphp
             <div class="file-card">
                 <div class="file-header">
@@ -540,20 +547,20 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="file-content">
                     <!-- Link Display Area -->
                     <div class="link-display" id="link-display-{{ $linkData['slug'] }}">
                         <div class="link-text" id="link-text-{{ $linkData['slug'] }}"></div>
                     </div>
-                    
+
                     <div class="file-actions">
                         <button class="btn-unlock" onclick="unlockLink('{{ $linkData['slug'] }}')" id="btn-{{ $linkData['slug'] }}">
                             <i class="fas fa-lock-open me-1"></i>
                             <span id="btn-text-{{ $linkData['slug'] }}">UNLOCK LINK</span>
                             <div class="loading-spinner ms-1" id="spinner-{{ $linkData['slug'] }}" style="display: none;"></div>
                         </button>
-                        
+
                         <button class="btn-copy" onclick="copyDownloadLink('{{ $linkData['slug'] }}')" id="copy-btn-{{ $linkData['slug'] }}">
                             <i class="fas fa-copy me-1"></i>
                             <span id="copy-text-{{ $linkData['slug'] }}">COPY LINK</span>
@@ -570,7 +577,7 @@
                 <i class="fas fa-shield-alt me-2 text-success"></i>
                 <span class="small fw-medium">Secure Download Links • Direct Access</span>
             </div>
-            
+
             <a href="{{ route('file.form') }}" class="btn btn-outline-primary">
                 <i class="fas fa-plus me-2"></i>
                 Generate New Links
@@ -611,42 +618,43 @@
         spinner.style.display = 'inline-block';
 
         try {
-            const response = await fetch('{{ route('file.verify-download') }}', {
-                method: 'POST',
-                headers: {
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json'
-                },
-                body: JSON.stringify({
-                    slug: slug
-                })
-            });
+            const response = await fetch('{{ route('
+                file.verify - download ') }}', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        slug: slug
+                    })
+                });
 
             const data = await response.json();
-            
+
             if (data.success) {
                 // Update UI to show unlocked state
                 unlockBtn.innerHTML = '<i class="fas fa-check me-1"></i><span>UNLOCKED</span>';
                 unlockBtn.classList.add('btn-unlocked');
                 unlockBtn.disabled = true;
-                
+
                 // Show link and copy button
                 const linkText = document.getElementById(`link-text-${slug}`);
                 const linkDisplay = document.getElementById(`link-display-${slug}`);
                 const copyBtn = document.getElementById(`copy-btn-${slug}`);
-                
+
                 linkText.textContent = data.download_url;
                 linkDisplay.style.display = 'block';
                 copyBtn.style.display = 'flex';
-                
+
                 // Hide spinner
                 spinner.style.display = 'none';
-                
+
                 // Show success toast
                 document.getElementById('toastMessage').textContent = 'Link unlocked successfully!';
                 successToast.show();
-                
+
             } else {
                 alert(data.message || 'Failed to unlock link. Please try again.');
                 resetButton(slug);
@@ -670,20 +678,21 @@
         bulkBtnSpinner.style.display = 'inline-block';
 
         try {
-            const response = await fetch('{{ route('file.verify-download-all') }}', {
-                method: 'POST',
-                headers: {
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json'
-                },
-                body: JSON.stringify({
-                    batch_id: '{{ $batch_id }}'
-                })
-            });
+            const response = await fetch('{{ route('
+                file.verify - download - all ') }}', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        batch_id: '{{ $batch_id }}'
+                    })
+                });
 
             const data = await response.json();
-            
+
             if (data.success) {
                 // Unlock all links in the UI
                 data.download_links.forEach(linkData => {
@@ -697,12 +706,12 @@
                         unlockBtn.classList.add('btn-unlocked');
                         unlockBtn.disabled = true;
                     }
-                    
+
                     if (linkText && linkDisplay) {
                         linkText.textContent = linkData.download_url;
                         linkDisplay.style.display = 'block';
                     }
-                    
+
                     if (copyBtn) {
                         copyBtn.style.display = 'flex';
                     }
@@ -712,14 +721,14 @@
                 bulkUnlockBtn.innerHTML = '<i class="fas fa-check me-1"></i><span>ALL UNLOCKED</span>';
                 bulkUnlockBtn.style.background = 'linear-gradient(135deg, #10b981, #059669)';
                 bulkUnlockBtn.disabled = true;
-                
+
                 // Hide spinner
                 bulkBtnSpinner.style.display = 'none';
-                
+
                 // Show success toast
                 document.getElementById('toastMessage').textContent = 'All links unlocked successfully!';
                 successToast.show();
-                
+
             } else {
                 alert(data.message || 'Failed to unlock links. Please try again.');
                 resetBulkButton();
@@ -735,17 +744,17 @@
         const unlockBtn = document.getElementById(`btn-${slug}`);
         const btnText = document.getElementById(`btn-text-${slug}`);
         const spinner = document.getElementById(`spinner-${slug}`);
-        
+
         if (unlockBtn) {
             unlockBtn.disabled = false;
             unlockBtn.innerHTML = '<i class="fas fa-lock-open me-1"></i><span>UNLOCK LINK</span>';
             unlockBtn.classList.remove('btn-unlocked');
         }
-        
+
         if (btnText) {
             btnText.textContent = 'UNLOCK LINK';
         }
-        
+
         if (spinner) {
             spinner.style.display = 'none';
         }
@@ -755,17 +764,17 @@
         const bulkUnlockBtn = document.getElementById('bulkUnlockBtn');
         const bulkBtnText = document.getElementById('bulkBtnText');
         const bulkBtnSpinner = document.getElementById('bulkBtnSpinner');
-        
+
         if (bulkUnlockBtn) {
             bulkUnlockBtn.disabled = false;
             bulkUnlockBtn.innerHTML = '<i class="fas fa-unlock-alt me-1"></i><span>UNLOCK ALL LINKS</span>';
             bulkUnlockBtn.style.background = 'linear-gradient(135deg, #f59e0b, #d97706)';
         }
-        
+
         if (bulkBtnText) {
             bulkBtnText.textContent = 'UNLOCK ALL LINKS';
         }
-        
+
         if (bulkBtnSpinner) {
             bulkBtnSpinner.style.display = 'none';
         }
@@ -775,22 +784,22 @@
     function copyShareUrl() {
         const shareUrlInput = document.getElementById('shareUrlInput');
         const copyUrlBtn = document.getElementById('copyUrlBtn');
-        
+
         shareUrlInput.select();
         shareUrlInput.setSelectionRange(0, 99999);
-        
+
         navigator.clipboard.writeText(shareUrlInput.value).then(() => {
             copyUrlBtn.classList.add('copied');
             copyUrlBtn.innerHTML = '<i class="fas fa-check me-1"></i><span>COPIED!</span>';
-            
+
             document.getElementById('toastMessage').textContent = 'Shareable link copied to clipboard!';
             successToast.show();
-            
+
             setTimeout(() => {
                 copyUrlBtn.classList.remove('copied');
                 copyUrlBtn.innerHTML = '<i class="fas fa-copy me-1"></i><span>COPY</span>';
             }, 2000);
-            
+
         }).catch(() => {
             alert('Failed to copy link');
         });
@@ -799,20 +808,20 @@
     function copyDownloadLink(slug) {
         const linkText = document.getElementById(`link-text-${slug}`);
         const copyBtn = document.getElementById(`copy-btn-${slug}`);
-        
+
         if (linkText && linkText.textContent) {
             navigator.clipboard.writeText(linkText.textContent).then(() => {
                 copyBtn.classList.add('btn-copied');
                 copyBtn.innerHTML = '<i class="fas fa-check me-1"></i><span>COPIED!</span>';
-                
+
                 document.getElementById('toastMessage').textContent = 'Link copied to clipboard!';
                 successToast.show();
-                
+
                 setTimeout(() => {
                     copyBtn.classList.remove('btn-copied');
                     copyBtn.innerHTML = '<i class="fas fa-copy me-1"></i><span>COPY LINK</span>';
                 }, 2000);
-                
+
             }).catch(() => {
                 alert('Failed to copy link');
             });
